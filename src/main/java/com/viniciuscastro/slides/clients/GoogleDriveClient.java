@@ -6,6 +6,7 @@ import com.viniciuscastro.slides.models.Drive;
 import com.viniciuscastro.slides.models.DrivePage;
 
 import io.quarkus.oidc.token.propagation.AccessToken;
+import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -20,5 +21,5 @@ public interface GoogleDriveClient {
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    DrivePage findFiles(@BeanParam Drive drive);
+    Uni<DrivePage> findFiles(@BeanParam Drive drive);
 }

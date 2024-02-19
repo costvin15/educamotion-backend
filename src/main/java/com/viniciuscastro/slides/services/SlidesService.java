@@ -1,18 +1,20 @@
 package com.viniciuscastro.slides.services;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import com.viniciuscastro.slides.clients.GoogleDriveClient;
 import com.viniciuscastro.slides.clients.GoogleSlidesClient;
 import com.viniciuscastro.slides.models.Drive;
+import com.viniciuscastro.slides.models.DriveFile;
 import com.viniciuscastro.slides.models.DrivePage;
 import com.viniciuscastro.slides.models.Slide;
+import com.viniciuscastro.slides.models.SlideThumbnail;
 import com.viniciuscastro.slides.resources.MimeType;
 
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -27,40 +29,35 @@ public class SlidesService {
     @RestClient
     GoogleSlidesClient slidesClient;
 
-    @SuppressWarnings("unchecked")
-    public Uni<List<Slide>> getSlides() {
-        List<String> presentationIds = this.findPresentationsIds();
-        List<Uni<Slide>> slides = new ArrayList<>();
+    public Uni<SlideThumbnail> getThumbnail(String presentationId, String pageObjectId) {
+        return this.slidesClient.getThumbnail(presentationId, pageObjectId);
+    }
 
-        for (String presentationId : presentationIds) {
-            slides.add(this.findSlideInformation(presentationId));
-        }
-
-        return Uni.combine()
-            .all()
-            .unis(slides)
-            .with(list -> (List<Slide>) list);
+    public Multi<Slide> getSlides() {
+        Multi<List<DriveFile>> pages = this.findAllPresentationsFromDrive()
+            .onItem().transform(page -> page.files);
+        Multi<DriveFile> files = pages.flatMap(list -> {
+            return Multi.createFrom().iterable(list);
+        });
+        Multi<String> presentationsIds = files.onItem().transform(file -> file.id);
+        Multi<Slide> slides = presentationsIds.onItem()
+            .transformToUni(presentationId -> this.findSlideInformation(presentationId))
+            .merge();
+        return slides;
     }
 
     private Uni<Slide> findSlideInformation(String presentationId) {
         return this.slidesClient.getSlide(presentationId);
     }
 
-    private List<String> findPresentationsIds() {
-        List<String> presentationIds = new ArrayList<>();
-
-        DrivePage drivePage = this.driveClient.findFiles(new Drive(MimeType.PRESENTATION));
-        String nextPageToken = drivePage.nextPageToken;
-
-        while (nextPageToken != null) {
-            List<String> foundedIds = drivePage.files.stream()
-                .map(file -> file.id)
-                .collect(Collectors.toList());
-            presentationIds.addAll(foundedIds);
-            drivePage = this.driveClient.findFiles(new Drive(MimeType.PRESENTATION, nextPageToken));
-            nextPageToken = drivePage.nextPageToken;
-        }
-
-        return presentationIds;
+    public Multi<DrivePage> findAllPresentationsFromDrive() {
+        Multi<DrivePage> stream = Multi.createBy().repeating()
+            .uni(
+                () -> new AtomicReference<String>(null),
+                state -> driveClient.findFiles(new Drive(MimeType.PRESENTATION, state.get()))
+                    .onItem().invoke(page -> state.set(page.nextPageToken))
+            )
+            .whilst(page -> page.nextPageToken != null);
+        return stream;
     }
 }
