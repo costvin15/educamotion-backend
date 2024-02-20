@@ -3,8 +3,12 @@ on:
   push:
     branches: [ main ]
 jobs:
-  build:
+  generating-coverage:
     runs-on: ubuntu-latest
+    env:
+      KEYCLOAK_URL: http://localhost:8545/realms/educamotion
+      KEYCLOAK_CLIENT_ID: backend-service
+      KEYCLOAK_CLIENT_SECRET: secret
     steps:
     - uses: actions/checkout@v3
     - name: Set up the Java JDK
