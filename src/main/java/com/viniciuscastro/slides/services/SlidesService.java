@@ -35,7 +35,7 @@ public class SlidesService {
 
     public Multi<Slide> getSlides() {
         Multi<List<DriveFile>> pages = this.findAllPresentationsFromDrive()
-            .onItem().transform(page -> page.files);
+            .onItem().transform(page -> page.getFiles());
         Multi<DriveFile> files = pages.flatMap(list -> {
             return Multi.createFrom().iterable(list);
         });
@@ -55,9 +55,9 @@ public class SlidesService {
             .uni(
                 () -> new AtomicReference<String>(null),
                 state -> driveClient.findFiles(new Drive(MimeType.PRESENTATION, state.get()))
-                    .onItem().invoke(page -> state.set(page.nextPageToken))
+                    .onItem().invoke(page -> state.set(page.getNextPageToken()))
             )
-            .whilst(page -> page.nextPageToken != null);
+            .whilst(page -> page.getNextPageToken() != null);
         return stream;
     }
 }

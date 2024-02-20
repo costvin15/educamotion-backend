@@ -17,6 +17,7 @@ import com.viniciuscastro.slides.models.Drive;
 import com.viniciuscastro.slides.models.DriveFile;
 import com.viniciuscastro.slides.models.DrivePage;
 import com.viniciuscastro.slides.models.Slide;
+import com.viniciuscastro.slides.models.SlidePage;
 import com.viniciuscastro.slides.models.SlideThumbnail;
 
 import io.quarkus.test.junit.QuarkusMock;
@@ -55,6 +56,11 @@ class SlidesServiceTest {
                             .builder()
                             .presentationId("expectedPresentationId-1")
                             .title("Expected Presentation 1")
+                            .slides(List.of(
+                                SlidePage.builder()
+                                    .objectId("p")
+                                    .build()
+                            ))
                             .build();
                         break;
                     case "expectedPresentationId-2":
@@ -62,6 +68,11 @@ class SlidesServiceTest {
                             .builder()
                             .presentationId("expectedPresentationId-2")
                             .title("Expected Presentation 2")
+                            .slides(List.of(
+                                SlidePage.builder()
+                                    .objectId("b")
+                                    .build()
+                            ))
                             .build();
                         break;
                     default:
@@ -84,13 +95,17 @@ class SlidesServiceTest {
                     .id("expectedPresentationId-2")
                     .build();
 
-                DrivePage drivePage = new DrivePage();
+                DrivePage drivePage;
 
                 if (drive.getPageToken() == null) {
-                    drivePage.nextPageToken = "1";
-                    drivePage.files = List.of(file1);
+                    drivePage = DrivePage.builder()
+                        .nextPageToken("1")
+                        .files(List.of(file1))
+                        .build();
                 } else {
-                    drivePage.files = List.of(file2);
+                    drivePage = DrivePage.builder()
+                        .files(List.of(file2))
+                        .build();
                 }
 
                 return Uni.createFrom().item(drivePage);
@@ -117,10 +132,10 @@ class SlidesServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-        "0, expectedPresentationId-1, Expected Presentation 1",
-        "1, expectedPresentationId-2, Expected Presentation 2"
+        "0, expectedPresentationId-1, Expected Presentation 1, p",
+        "1, expectedPresentationId-2, Expected Presentation 2, b"
     })
-    void test_get_slides_should_return_expected_slides(int index, String expectedPresentationId, String expectedTitle) {
+    void test_get_slides_should_return_expected_slides(int index, String expectedPresentationId, String expectedTitle, String expectedObjectId) {
         Multi<Slide> result = this.slidesService.getSlides();
         List<Slide> receivedSlides = result.collect().asList().await().indefinitely();
 
@@ -128,5 +143,6 @@ class SlidesServiceTest {
         assertEquals(2, receivedSlides.size());
         assertEquals(expectedTitle, receivedSlides.get(index).getTitle());
         assertEquals(expectedPresentationId, receivedSlides.get(index).getPresentationId());
+        assertEquals(expectedObjectId, receivedSlides.get(index).getSlides().get(0).getObjectId());
     }
 }

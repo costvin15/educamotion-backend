@@ -2,11 +2,11 @@ package com.viniciuscastro.slides.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
 @Builder
 @AllArgsConstructor
-@Data
+@Getter
 public class SlideThumbnail {
     private Integer width;
     private Integer height;
