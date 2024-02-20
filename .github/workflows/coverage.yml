@@ -24,7 +24,7 @@ jobs:
         server: http://keycloak:8080/auth
         username: admin
         password: admin
-        kcadm: create realms -s realm=educamotion -s enabled=true -o
+        realm: educamotion
     - uses: actions/checkout@v3
     - name: Set up the Java JDK
       uses: actions/setup-java@v3
