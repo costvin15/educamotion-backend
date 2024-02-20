@@ -5,11 +5,26 @@ on:
 jobs:
   generating-coverage:
     runs-on: ubuntu-latest
+    services:
+      keycloak:
+        image: quay.io/keycloak/keycloak:latest
+        ports:
+          - 8545:8080
+        env:
+          KEYCLOAK_USER: admin
+          KEYCLOAK_PASSWORD: admin
     env:
       KEYCLOAK_URL: http://localhost:8545/realms/educamotion
       KEYCLOAK_CLIENT_ID: backend-service
       KEYCLOAK_CLIENT_SECRET: secret
     steps:
+    - name: Set up the Keycloak Admin
+      uses: carlosthe19916/keycloak-action@0.4
+      with:
+        server: http://keycloak:8080/auth
+        username: admin
+        password: admin
+        kcadm: create realms -s realm=educamotion -s enabled=true -o
     - uses: actions/checkout@v3
     - name: Set up the Java JDK
       uses: actions/setup-java@v3
