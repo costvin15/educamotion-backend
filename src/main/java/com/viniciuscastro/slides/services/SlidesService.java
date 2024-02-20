@@ -39,7 +39,7 @@ public class SlidesService {
         Multi<DriveFile> files = pages.flatMap(list -> {
             return Multi.createFrom().iterable(list);
         });
-        Multi<String> presentationsIds = files.onItem().transform(file -> file.id);
+        Multi<String> presentationsIds = files.onItem().transform(file -> file.getId());
         Multi<Slide> slides = presentationsIds.onItem()
             .transformToUni(presentationId -> this.findSlideInformation(presentationId))
             .merge();

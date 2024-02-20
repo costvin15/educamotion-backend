@@ -2,8 +2,15 @@ package com.viniciuscastro.slides.models;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Builder
+@AllArgsConstructor
+@Data
 public class Slide {
-    public String presentationId;
-    public String title;
-    public List<SlidePage> slides;
+    private String presentationId;
+    private String title;
+    private List<SlidePage> slides;
 }
