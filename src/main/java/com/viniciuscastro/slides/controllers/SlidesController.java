@@ -21,7 +21,7 @@ public class SlidesController {
     SlidesService slidesService;
 
     @GET
-    @Path("all")
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     public Multi<Slide> findAll() {
         return this.slidesService.getSlides();
