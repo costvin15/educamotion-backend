@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class DriveFile {
     private String id;
+    private String name;
 }

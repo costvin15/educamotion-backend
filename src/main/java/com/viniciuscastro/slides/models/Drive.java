@@ -13,8 +13,13 @@ public class Drive {
     @QueryParam("pageToken")
     private String pageToken;
 
-    public Drive(MimeType mimeType, String pageToken) {
+    @Getter
+    @QueryParam("pageSize")
+    private Integer pageSize;
+
+    public Drive(MimeType mimeType, String pageToken, Integer pageSize) {
         this.q = mimeType.mimeType;
         this.pageToken = pageToken;
+        this.pageSize = pageSize;
     }
 }

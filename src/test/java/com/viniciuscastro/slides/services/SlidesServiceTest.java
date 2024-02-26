@@ -22,7 +22,6 @@ import com.viniciuscastro.slides.models.SlideThumbnail;
 
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 
@@ -89,10 +88,12 @@ class SlidesServiceTest {
                 DriveFile file1 = DriveFile
                     .builder()
                     .id("expectedPresentationId-1")
+                    .name("Expected Presentation 1")
                     .build();
                 DriveFile file2 = DriveFile
                     .builder()
                     .id("expectedPresentationId-2")
+                    .name("Expected Presentation 2")
                     .build();
 
                 DrivePage drivePage;
@@ -118,10 +119,9 @@ class SlidesServiceTest {
 
     @Test
     void test_get_thumbnail_should_return_expected_thumbnail() {
-        String presentationId = "presentationId";
-        String pageObjectId = "pageObjectId";
+        String presentationId = "expectedPresentationId-1";
 
-        Uni<SlideThumbnail> result = this.slidesService.getThumbnail(presentationId, pageObjectId);
+        Uni<SlideThumbnail> result = this.slidesService.getThumbnail(presentationId);
         SlideThumbnail receivedThumbnail = result.await().indefinitely();
 
         assertNotNull(receivedThumbnail);
@@ -132,17 +132,16 @@ class SlidesServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-        "0, expectedPresentationId-1, Expected Presentation 1, p",
-        "1, expectedPresentationId-2, Expected Presentation 2, b"
+        ", expectedPresentationId-1, Expected Presentation 1",
+        "1, expectedPresentationId-2, Expected Presentation 2"
     })
-    void test_get_slides_should_return_expected_slides(int index, String expectedPresentationId, String expectedTitle, String expectedObjectId) {
-        Multi<Slide> result = this.slidesService.getSlides();
-        List<Slide> receivedSlides = result.collect().asList().await().indefinitely();
+    void test_get_slides_should_return_expected_slides(String nextPageToken, String expectedPresentationId, String expectedTitle) {
+        Uni<DrivePage> result = this.slidesService.findPresentationsFromDrive(nextPageToken);
+        DrivePage receivedPage = result.await().indefinitely();
 
-        assertNotNull(receivedSlides);
-        assertEquals(2, receivedSlides.size());
-        assertEquals(expectedTitle, receivedSlides.get(index).getTitle());
-        assertEquals(expectedPresentationId, receivedSlides.get(index).getPresentationId());
-        assertEquals(expectedObjectId, receivedSlides.get(index).getSlides().get(0).getObjectId());
+        assertNotNull(receivedPage);
+        assertEquals(1, receivedPage.getFiles().size());
+        assertEquals(expectedTitle, receivedPage.getFiles().get(0).getName());
+        assertEquals(expectedPresentationId, receivedPage.getFiles().get(0).getId());
     }
 }
