@@ -1,6 +1,7 @@
 package com.viniciuscastro.slides.controllers;
 
 import com.viniciuscastro.slides.models.DrivePage;
+import com.viniciuscastro.slides.models.Slide;
 import com.viniciuscastro.slides.models.SlideThumbnail;
 import com.viniciuscastro.slides.services.SlidesService;
 
@@ -25,6 +26,12 @@ public class SlidesController {
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<DrivePage> findPage(@QueryParam("pageToken") String pageToken) {
         return this.slidesService.findPresentationsFromDrive(pageToken);
+    }
+
+    @GET
+    @Path("{presentationId}")
+    public Uni<Slide> findSlideInformation(@PathParam("presentationId") String presentationId) {
+        return this.slidesService.findSlideInformation(presentationId);
     }
 
     @GET
