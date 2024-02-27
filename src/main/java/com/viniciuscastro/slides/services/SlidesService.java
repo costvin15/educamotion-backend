@@ -11,6 +11,7 @@ import com.viniciuscastro.slides.models.SlideThumbnail;
 import com.viniciuscastro.slides.resources.MimeType;
 
 import io.quarkus.cache.CacheResult;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -36,12 +37,27 @@ public class SlidesService {
         });
     }
 
+    @CacheResult(cacheName = "slideAllThumbnails")
+    public Multi<SlideThumbnail> getAllThumbnails(String presentationId) {
+        Uni<Slide> slideInformation = this.findSlideInformation(presentationId);
+        Multi<SlideThumbnail> thumbnails = slideInformation.onItem().transformToMulti(slide -> {
+            if (slide.getSlides() == null || slide.getSlides().isEmpty()) {
+                return Multi.createFrom().empty();
+            }
+            
+            return Multi.createFrom().iterable(slide.getSlides())
+                .onItem()
+                .transformToUni(slideItem -> this.slidesClient.getThumbnail(presentationId, slideItem.getObjectId()))
+                .merge();
+        });
+        return thumbnails;
+    }
+
     @CacheResult(cacheName = "slideInformation")
     public Uni<Slide> findSlideInformation(String presentationId) {
         return this.slidesClient.getSlide(presentationId);
     }
 
-    @CacheResult(cacheName = "presentations")
     public Uni<DrivePage> findPresentationsFromDrive(String pageToken) {
         return this.driveClient.findFiles(new Drive(MimeType.PRESENTATION, pageToken, 30));
     }

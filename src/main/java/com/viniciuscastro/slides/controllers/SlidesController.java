@@ -6,6 +6,7 @@ import com.viniciuscastro.slides.models.SlideThumbnail;
 import com.viniciuscastro.slides.services.SlidesService;
 
 import io.quarkus.security.Authenticated;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -39,5 +40,12 @@ public class SlidesController {
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<SlideThumbnail> getThumbnail(@PathParam("presentationId") String presentationId) {
         return this.slidesService.getThumbnail(presentationId);
+    }
+
+    @GET
+    @Path("thumbnails/{presentationId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Multi<SlideThumbnail> getThumbnails(@PathParam("presentationId") String presentationId) {
+        return this.slidesService.getAllThumbnails(presentationId);
     }
 }
