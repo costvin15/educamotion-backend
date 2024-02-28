@@ -2,12 +2,12 @@ package com.viniciuscastro.presentation.services;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import com.viniciuscastro.presentation.clients.GoogleDriveClient;
-import com.viniciuscastro.presentation.clients.GoogleSlidesClient;
+import com.viniciuscastro.clients.GoogleDriveClient;
+import com.viniciuscastro.clients.GoogleSlidesClient;
+import com.viniciuscastro.clients.models.Presentation;
+import com.viniciuscastro.clients.models.PresentationThumbnail;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DrivePage;
-import com.viniciuscastro.presentation.models.Presentation;
-import com.viniciuscastro.presentation.models.PresentationThumbnail;
 import com.viniciuscastro.presentation.resources.MimeType;
 
 import io.quarkus.cache.CacheResult;
@@ -33,7 +33,7 @@ public class PresentationService {
             if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
                 return Uni.createFrom().nullItem();
             }
-            return this.slidesClient.getThumbnail(presentationId, presentation.getSlides().get(0).getObjectId());
+            return this.slidesClient.getPresentationThumbnail(presentationId, presentation.getSlides().get(0).getObjectId());
         });
     }
 
@@ -47,7 +47,7 @@ public class PresentationService {
             
             return Multi.createFrom().iterable(presentation.getSlides())
                 .onItem()
-                .transformToUni(slideItem -> this.slidesClient.getThumbnail(presentationId, slideItem.getObjectId()))
+                .transformToUni(slideItem -> this.slidesClient.getPresentationThumbnail(presentationId, slideItem.getObjectId()))
                 .merge();
         });
         return thumbnails;
@@ -55,7 +55,7 @@ public class PresentationService {
 
     @CacheResult(cacheName = "getPresentationInformation")
     public Uni<Presentation> findPresentationInformation(String presentationId) {
-        return this.slidesClient.getSlide(presentationId);
+        return this.slidesClient.getPresentation(presentationId);
     }
 
     public Uni<DrivePage> findPresentationsFromDrive(String pageToken) {

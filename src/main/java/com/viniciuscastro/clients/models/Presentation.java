@@ -1,6 +1,8 @@
-package com.viniciuscastro.presentation.models;
+package com.viniciuscastro.clients.models;
 
 import java.util.List;
+
+import com.viniciuscastro.presentation.models.PresentationPage;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

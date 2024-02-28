@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import com.viniciuscastro.presentation.clients.GoogleDriveClient;
-import com.viniciuscastro.presentation.clients.GoogleSlidesClient;
+import com.viniciuscastro.clients.GoogleDriveClient;
+import com.viniciuscastro.clients.GoogleSlidesClient;
+import com.viniciuscastro.clients.models.Presentation;
+import com.viniciuscastro.clients.models.PresentationThumbnail;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DriveFile;
 import com.viniciuscastro.presentation.models.DrivePage;
-import com.viniciuscastro.presentation.models.Presentation;
 import com.viniciuscastro.presentation.models.PresentationPage;
-import com.viniciuscastro.presentation.models.PresentationThumbnail;
 
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -34,7 +34,7 @@ class PresentationServiceTest {
     void setUp() {
         GoogleSlidesClient slidesClientMock = new GoogleSlidesClient() {
             @Override
-            public Uni<PresentationThumbnail> getThumbnail(String presentationId, String pageObjectId) {
+            public Uni<PresentationThumbnail> getPresentationThumbnail(String presentationId, String pageObjectId) {
                 return Uni.createFrom().item(
                     PresentationThumbnail
                         .builder()
@@ -46,7 +46,7 @@ class PresentationServiceTest {
             }
 
             @Override
-            public Uni<Presentation> getSlide(String presentationId) {
+            public Uni<Presentation> getPresentation(String presentationId) {
                 Presentation expectedSlide;
 
                 switch (presentationId) {
@@ -79,6 +79,11 @@ class PresentationServiceTest {
                 }
 
                 return Uni.createFrom().item(expectedSlide);
+            }
+
+            @Override
+            public Uni<String> performBatchUpdate() {
+                return null;
             }
         };
 

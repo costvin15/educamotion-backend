@@ -1,8 +1,8 @@
 package com.viniciuscastro.presentation.controllers;
 
+import com.viniciuscastro.clients.models.Presentation;
+import com.viniciuscastro.clients.models.PresentationThumbnail;
 import com.viniciuscastro.presentation.models.DrivePage;
-import com.viniciuscastro.presentation.models.Presentation;
-import com.viniciuscastro.presentation.models.PresentationThumbnail;
 import com.viniciuscastro.presentation.services.PresentationService;
 
 import io.quarkus.security.Authenticated;

@@ -1,4 +1,4 @@
-package com.viniciuscastro.presentation.models;
+package com.viniciuscastro.clients.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

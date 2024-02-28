@@ -1,4 +1,4 @@
-package com.viniciuscastro.presentation.clients;
+package com.viniciuscastro.clients;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
