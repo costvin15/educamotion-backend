@@ -1,4 +1,4 @@
-package com.viniciuscastro.slides.resources;
+package com.viniciuscastro.presentation.resources;
 
 public enum MimeType {
     PRESENTATION("mimeType='application/vnd.google-apps.presentation'");

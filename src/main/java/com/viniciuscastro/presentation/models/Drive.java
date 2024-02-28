@@ -1,6 +1,6 @@
-package com.viniciuscastro.slides.models;
+package com.viniciuscastro.presentation.models;
 
-import com.viniciuscastro.slides.resources.MimeType;
+import com.viniciuscastro.presentation.resources.MimeType;
 
 import jakarta.ws.rs.QueryParam;
 import lombok.Getter;

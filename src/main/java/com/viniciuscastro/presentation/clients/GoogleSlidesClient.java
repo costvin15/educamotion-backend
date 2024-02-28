@@ -1,9 +1,9 @@
-package com.viniciuscastro.slides.clients;
+package com.viniciuscastro.presentation.clients;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-import com.viniciuscastro.slides.models.Slide;
-import com.viniciuscastro.slides.models.SlideThumbnail;
+import com.viniciuscastro.presentation.models.Presentation;
+import com.viniciuscastro.presentation.models.PresentationThumbnail;
 
 import io.quarkus.oidc.token.propagation.AccessToken;
 import io.smallrye.mutiny.Uni;
@@ -22,11 +22,11 @@ public interface GoogleSlidesClient {
     @Path("/{presentationId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Uni<Slide> getSlide(@PathParam("presentationId") String presentationId);
+    Uni<Presentation> getSlide(@PathParam("presentationId") String presentationId);
 
     @GET
     @Path("/{presentationId}/pages/{pageObjectId}/thumbnail")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Uni<SlideThumbnail> getThumbnail(@PathParam("presentationId") String presentationId, @PathParam("pageObjectId") String pageObjectId);
+    Uni<PresentationThumbnail> getThumbnail(@PathParam("presentationId") String presentationId, @PathParam("pageObjectId") String pageObjectId);
 }

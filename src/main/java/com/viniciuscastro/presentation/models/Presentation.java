@@ -1,4 +1,4 @@
-package com.viniciuscastro.slides.models;
+package com.viniciuscastro.presentation.models;
 
 import java.util.List;
 
@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class Slide {
+public class Presentation {
     private String presentationId;
     private String title;
-    private List<SlidePage> slides;
+    private List<PresentationPage> slides;
 }

@@ -1,4 +1,4 @@
-package com.viniciuscastro.slides.services;
+package com.viniciuscastro.presentation.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import com.viniciuscastro.slides.clients.GoogleDriveClient;
-import com.viniciuscastro.slides.clients.GoogleSlidesClient;
-import com.viniciuscastro.slides.models.Drive;
-import com.viniciuscastro.slides.models.DriveFile;
-import com.viniciuscastro.slides.models.DrivePage;
-import com.viniciuscastro.slides.models.Slide;
-import com.viniciuscastro.slides.models.SlidePage;
-import com.viniciuscastro.slides.models.SlideThumbnail;
+import com.viniciuscastro.presentation.clients.GoogleDriveClient;
+import com.viniciuscastro.presentation.clients.GoogleSlidesClient;
+import com.viniciuscastro.presentation.models.Drive;
+import com.viniciuscastro.presentation.models.DriveFile;
+import com.viniciuscastro.presentation.models.DrivePage;
+import com.viniciuscastro.presentation.models.Presentation;
+import com.viniciuscastro.presentation.models.PresentationPage;
+import com.viniciuscastro.presentation.models.PresentationThumbnail;
 
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -26,17 +26,17 @@ import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-class SlidesServiceTest {
+class PresentationServiceTest {
     @Inject
-    SlidesService slidesService;
+    PresentationService slidesService;
 
     @BeforeEach
     void setUp() {
         GoogleSlidesClient slidesClientMock = new GoogleSlidesClient() {
             @Override
-            public Uni<SlideThumbnail> getThumbnail(String presentationId, String pageObjectId) {
+            public Uni<PresentationThumbnail> getThumbnail(String presentationId, String pageObjectId) {
                 return Uni.createFrom().item(
-                    SlideThumbnail
+                    PresentationThumbnail
                         .builder()
                         .contentUrl("https://expectedContentUrl")
                         .width(1234)
@@ -46,29 +46,29 @@ class SlidesServiceTest {
             }
 
             @Override
-            public Uni<Slide> getSlide(String presentationId) {
-                Slide expectedSlide;
+            public Uni<Presentation> getSlide(String presentationId) {
+                Presentation expectedSlide;
 
                 switch (presentationId) {
                     case "expectedPresentationId-1":
-                        expectedSlide = Slide
+                        expectedSlide = Presentation
                             .builder()
                             .presentationId("expectedPresentationId-1")
                             .title("Expected Presentation 1")
                             .slides(List.of(
-                                SlidePage.builder()
+                                PresentationPage.builder()
                                     .objectId("p")
                                     .build()
                             ))
                             .build();
                         break;
                     case "expectedPresentationId-2":
-                        expectedSlide = Slide
+                        expectedSlide = Presentation
                             .builder()
                             .presentationId("expectedPresentationId-2")
                             .title("Expected Presentation 2")
                             .slides(List.of(
-                                SlidePage.builder()
+                                PresentationPage.builder()
                                     .objectId("b")
                                     .build()
                             ))
@@ -121,8 +121,8 @@ class SlidesServiceTest {
     void test_get_thumbnail_should_return_expected_thumbnail() {
         String presentationId = "expectedPresentationId-1";
 
-        Uni<SlideThumbnail> result = this.slidesService.getThumbnail(presentationId);
-        SlideThumbnail receivedThumbnail = result.await().indefinitely();
+        Uni<PresentationThumbnail> result = this.slidesService.getThumbnail(presentationId);
+        PresentationThumbnail receivedThumbnail = result.await().indefinitely();
 
         assertNotNull(receivedThumbnail);
         assertEquals("https://expectedContentUrl", receivedThumbnail.getContentUrl());

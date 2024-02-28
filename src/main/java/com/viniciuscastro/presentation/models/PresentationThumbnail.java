@@ -1,4 +1,4 @@
-package com.viniciuscastro.slides.models;
+package com.viniciuscastro.presentation.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class SlideThumbnail {
+public class PresentationThumbnail {
     private Integer width;
     private Integer height;
     private String contentUrl;

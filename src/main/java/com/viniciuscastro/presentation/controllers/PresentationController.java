@@ -1,9 +1,9 @@
-package com.viniciuscastro.slides.controllers;
+package com.viniciuscastro.presentation.controllers;
 
-import com.viniciuscastro.slides.models.DrivePage;
-import com.viniciuscastro.slides.models.Slide;
-import com.viniciuscastro.slides.models.SlideThumbnail;
-import com.viniciuscastro.slides.services.SlidesService;
+import com.viniciuscastro.presentation.models.DrivePage;
+import com.viniciuscastro.presentation.models.Presentation;
+import com.viniciuscastro.presentation.models.PresentationThumbnail;
+import com.viniciuscastro.presentation.services.PresentationService;
 
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Multi;
@@ -16,11 +16,11 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("slides")
+@Path("presentation")
 @Authenticated
-public class SlidesController {
+public class PresentationController {
     @Inject
-    SlidesService slidesService;
+    PresentationService slidesService;
 
     @GET
     @Path("")
@@ -31,21 +31,21 @@ public class SlidesController {
 
     @GET
     @Path("{presentationId}")
-    public Uni<Slide> findSlideInformation(@PathParam("presentationId") String presentationId) {
-        return this.slidesService.findSlideInformation(presentationId);
+    public Uni<Presentation> findPresentationInformation(@PathParam("presentationId") String presentationId) {
+        return this.slidesService.findPresentationInformation(presentationId);
     }
 
     @GET
     @Path("thumbnail/{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<SlideThumbnail> getThumbnail(@PathParam("presentationId") String presentationId) {
+    public Uni<PresentationThumbnail> getThumbnail(@PathParam("presentationId") String presentationId) {
         return this.slidesService.getThumbnail(presentationId);
     }
 
     @GET
     @Path("thumbnails/{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Multi<SlideThumbnail> getThumbnails(@PathParam("presentationId") String presentationId) {
+    public Multi<PresentationThumbnail> getThumbnails(@PathParam("presentationId") String presentationId) {
         return this.slidesService.getAllThumbnails(presentationId);
     }
 }

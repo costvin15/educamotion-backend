@@ -1,4 +1,4 @@
-package com.viniciuscastro.slides.models;
+package com.viniciuscastro.presentation.models;
 
 import java.util.List;
 

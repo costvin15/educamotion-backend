@@ -1,4 +1,4 @@
-package com.viniciuscastro.slides.models;
+package com.viniciuscastro.presentation.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class SlidePage {
-    private String objectId;
+public class DriveFile {
+    private String id;
+    private String name;
 }

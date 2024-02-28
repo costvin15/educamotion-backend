@@ -1,9 +1,9 @@
-package com.viniciuscastro.slides.clients;
+package com.viniciuscastro.presentation.clients;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-import com.viniciuscastro.slides.models.Drive;
-import com.viniciuscastro.slides.models.DrivePage;
+import com.viniciuscastro.presentation.models.Drive;
+import com.viniciuscastro.presentation.models.DrivePage;
 
 import io.quarkus.oidc.token.propagation.AccessToken;
 import io.smallrye.mutiny.Uni;
