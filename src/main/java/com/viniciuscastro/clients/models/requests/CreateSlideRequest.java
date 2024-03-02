@@ -4,29 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-enum PredefinedLayout {
-    PREDEFINED_LAYOUT_UNSPECIFIED,
-    BLANK,
-    CAPTION_ONLY,
-    TITLE,
-    TITLE_AND_BODY,
-    TITLE_AND_TWO_COLUMNS,
-    TITLE_ONLY,
-    SECTION_HEADER,
-    SECTION_TITLE_AND_DESCRIPTION,
-    ONE_COLUMN_TEXT,
-    MAIN_POINT,
-    BIG_NUMBER;
-}
-
-@Builder
-@AllArgsConstructor
-@Getter
-class LayoutReference {
-    private PredefinedLayout predefinedLayout;
-    private String layoutId;
-}
-
 enum Type {
     NONE,
     BODY,

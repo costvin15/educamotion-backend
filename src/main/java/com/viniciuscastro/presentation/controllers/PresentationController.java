@@ -2,6 +2,7 @@ package com.viniciuscastro.presentation.controllers;
 
 import com.viniciuscastro.clients.models.Presentation;
 import com.viniciuscastro.clients.models.PresentationThumbnail;
+import com.viniciuscastro.clients.models.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.services.PresentationService;
 
@@ -52,7 +53,7 @@ public class PresentationController {
     @GET
     @Path("create/{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String createSlide(@PathParam("presentationId") String presentationId) {
-        return this.slidesService.createSlide(presentationId);
+    public Uni<PresentationUpdateResponse> createSlide(@PathParam("presentationId") String presentationId) {
+        return this.slidesService.createSlidePage(presentationId);
     }
 }

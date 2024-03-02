@@ -5,6 +5,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import com.viniciuscastro.clients.models.Presentation;
 import com.viniciuscastro.clients.models.PresentationThumbnail;
 import com.viniciuscastro.clients.models.PresentationUpdate;
+import com.viniciuscastro.clients.models.PresentationUpdateResponse;
 
 import io.quarkus.oidc.token.propagation.AccessToken;
 import io.smallrye.mutiny.Uni;
@@ -34,5 +35,5 @@ public interface GoogleSlidesClient {
 
     @POST
     @Path("/{presentationId}:batchUpdate")
-    Uni<String> performBatchUpdate(@PathParam("presentationId") String presentationId, PresentationUpdate presentationUpdate);
+    Uni<PresentationUpdateResponse> performBatchUpdate(@PathParam("presentationId") String presentationId, PresentationUpdate presentationUpdate);
 }
