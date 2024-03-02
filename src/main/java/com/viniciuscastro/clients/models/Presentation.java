@@ -17,4 +17,5 @@ public class Presentation {
     private String presentationId;
     private String title;
     private List<PresentationPage> slides;
+    private String revisionId;
 }

@@ -6,6 +6,10 @@ import com.viniciuscastro.clients.GoogleDriveClient;
 import com.viniciuscastro.clients.GoogleSlidesClient;
 import com.viniciuscastro.clients.models.Presentation;
 import com.viniciuscastro.clients.models.PresentationThumbnail;
+import com.viniciuscastro.clients.models.PresentationUpdate;
+import com.viniciuscastro.clients.models.requests.CreateSlideRequest;
+import com.viniciuscastro.clients.models.requests.Request;
+import com.viniciuscastro.clients.models.requests.WriteControl;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.resources.MimeType;
@@ -60,5 +64,23 @@ public class PresentationService {
 
     public Uni<DrivePage> findPresentationsFromDrive(String pageToken) {
         return this.driveClient.findFiles(new Drive(MimeType.PRESENTATION, pageToken, 30));
+    }
+
+    /**
+     * TODO: Há um caso de uso que não está sendo atendido, que é quando o usuário não tem permissão para
+     * editar esse slide (Por exemplo: O slide foi compartilhado com ele apenas para visualização)
+     */
+    public String createSlide(String presentationId) {
+        Uni<Presentation> presentationInformation = this.findPresentationInformation(presentationId);
+        Presentation presentation = presentationInformation.await().indefinitely();
+
+        CreateSlideRequest createSlideRequest = new CreateSlideRequest(null, 0, null, null);
+
+        Request request = new Request(createSlideRequest);
+        Request[] requests = { request };
+        WriteControl writeControl = new WriteControl(presentation.getRevisionId());
+
+        PresentationUpdate presentationUpdate = new PresentationUpdate(requests, writeControl);
+        return this.slidesClient.performBatchUpdate(presentationId, presentationUpdate).await().indefinitely();
     }
 }

@@ -48,4 +48,11 @@ public class PresentationController {
     public Multi<PresentationThumbnail> getThumbnails(@PathParam("presentationId") String presentationId) {
         return this.slidesService.getAllThumbnails(presentationId);
     }
+
+    @GET
+    @Path("create/{presentationId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String createSlide(@PathParam("presentationId") String presentationId) {
+        return this.slidesService.createSlide(presentationId);
+    }
 }
