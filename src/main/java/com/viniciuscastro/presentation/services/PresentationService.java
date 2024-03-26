@@ -21,6 +21,7 @@ import com.viniciuscastro.clients.models.requests.LayoutReference;
 import com.viniciuscastro.clients.models.requests.Request;
 import com.viniciuscastro.clients.models.requests.LayoutReference.PredefinedLayout;
 import com.viniciuscastro.presentation.controllers.PresentationController;
+import com.viniciuscastro.presentation.models.BucketFile;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.resources.MimeType;
@@ -56,7 +57,8 @@ public class PresentationService {
         try {
             BufferedInputStream input = new BufferedInputStream(new URL(thumbnail.getContentUrl()).openStream());
             byte[] content = input.readAllBytes();
-            this.googleCloudStorageResource.storage(content);
+            BucketFile file = new BucketFile("thumbnail2.png", "image/png", content);
+            this.googleCloudStorageResource.storage(file);
         } catch (IOException e) {
             e.printStackTrace();
         }

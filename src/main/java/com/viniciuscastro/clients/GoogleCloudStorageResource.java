@@ -4,6 +4,7 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
+import com.viniciuscastro.presentation.models.BucketFile;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -18,13 +19,13 @@ public class GoogleCloudStorageResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String storage(byte[] content) {
+    public String storage(BucketFile file) {
         String bucketName = "educamotion-presentation-images";
-        BlobId blobId = BlobId.of(bucketName, "Thumbnail.png");
+        BlobId blobId = BlobId.of(bucketName, file.getFilename());
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
-            .setContentType("image/png")
+            .setContentType(file.getContentType())
             .build();
-        Blob blob = this.storage.create(blobInfo, content);
+        Blob blob = this.storage.create(blobInfo, file.getContent());
 
         return new String(blob.getContent());
     }
