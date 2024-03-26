@@ -1,7 +1,14 @@
 package com.viniciuscastro.presentation.services;
 
-import org.eclipse.microprofile.rest.client.inject.RestClient;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.net.URL;
 
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.viniciuscastro.clients.GoogleCloudStorageResource;
 import com.viniciuscastro.clients.GoogleDriveClient;
 import com.viniciuscastro.clients.GoogleSlidesClient;
 import com.viniciuscastro.clients.models.Presentation;
@@ -13,11 +20,11 @@ import com.viniciuscastro.clients.models.requests.CreateSlideRequest;
 import com.viniciuscastro.clients.models.requests.LayoutReference;
 import com.viniciuscastro.clients.models.requests.Request;
 import com.viniciuscastro.clients.models.requests.LayoutReference.PredefinedLayout;
+import com.viniciuscastro.presentation.controllers.PresentationController;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.resources.MimeType;
 
-import io.quarkus.cache.CacheResult;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
@@ -33,7 +40,30 @@ public class PresentationService {
     @RestClient
     GoogleSlidesClient slidesClient;
 
-    @CacheResult(cacheName = "findFirstThumbnailFromPresentation")
+    @Inject
+    GoogleCloudStorageResource googleCloudStorageResource;
+
+    Logger logger = LoggerFactory.getLogger(PresentationController.class);
+
+    public PresentationThumbnail getThumbnailBlocking(String presentationId) {
+        Presentation presentation = this.slidesClient.getPresentationBlocking(presentationId);
+        if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
+            return null;
+        }
+        PresentationThumbnail thumbnail = this.slidesClient.getPresentationThumbnailBlocking(presentationId, presentation.getSlides().get(0).getObjectId());
+
+        logger.info(thumbnail.getContentUrl());
+        try {
+            BufferedInputStream input = new BufferedInputStream(new URL(thumbnail.getContentUrl()).openStream());
+            byte[] content = input.readAllBytes();
+            this.googleCloudStorageResource.storage(content);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return thumbnail;
+    }
+
     public Uni<PresentationThumbnail> getThumbnail(String presentationId) {
         Uni<Presentation> slideInformation = this.findPresentationInformation(presentationId);
         return slideInformation.onItem().transformToUni(presentation -> {
@@ -44,7 +74,6 @@ public class PresentationService {
         });
     }
 
-    @CacheResult(cacheName = "findAllThumbnailsFromPresentation")
     public Multi<PresentationThumbnail> getAllThumbnails(String presentationId) {
         Uni<Presentation> slideInformation = this.findPresentationInformation(presentationId);
         Multi<PresentationThumbnail> thumbnails = slideInformation.onItem().transformToMulti(presentation -> {
@@ -60,7 +89,6 @@ public class PresentationService {
         return thumbnails;
     }
 
-    @CacheResult(cacheName = "getPresentationInformation")
     public Uni<Presentation> findPresentationInformation(String presentationId) {
         return this.slidesClient.getPresentation(presentationId);
     }

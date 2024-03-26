@@ -1,7 +1,6 @@
 package com.viniciuscastro.clients.models;
 
 import com.viniciuscastro.clients.models.requests.Request;
-import com.viniciuscastro.clients.models.requests.WriteControl;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

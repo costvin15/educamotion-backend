@@ -17,8 +17,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("presentation")
 @Authenticated
+@Path("presentation")
 public class PresentationController {
     @Inject
     PresentationService slidesService;
@@ -39,8 +39,8 @@ public class PresentationController {
     @GET
     @Path("thumbnail/{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<PresentationThumbnail> getThumbnail(@PathParam("presentationId") String presentationId) {
-        return this.slidesService.getThumbnail(presentationId);
+    public PresentationThumbnail getThumbnail(@PathParam("presentationId") String presentationId) {
+        return this.slidesService.getThumbnailBlocking(presentationId);
     }
 
     @GET
