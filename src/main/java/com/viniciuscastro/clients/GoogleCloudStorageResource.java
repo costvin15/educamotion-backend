@@ -1,6 +1,5 @@
 package com.viniciuscastro.clients;
 
-import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
@@ -19,15 +18,15 @@ public class GoogleCloudStorageResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public BlobId storage(BucketFile file) {
+    public BucketFile storage(BucketFile file) {
         String bucketName = "educamotion-presentation-images";
 
         BlobId blobId = BlobId.of(bucketName, file.getFilename());
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
             .setContentType(file.getContentType())
             .build();
-        Blob blob = this.storage.create(blobInfo, file.getContent());
+        this.storage.create(blobInfo, file.getContent());
 
-        return blob.getBlobId();
+        return file;
     }
 }

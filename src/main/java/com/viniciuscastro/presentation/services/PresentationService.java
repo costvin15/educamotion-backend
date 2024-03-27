@@ -3,13 +3,12 @@ package com.viniciuscastro.presentation.services;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.cloud.storage.BlobId;
 import com.viniciuscastro.clients.GoogleCloudStorageResource;
 import com.viniciuscastro.clients.GoogleDriveClient;
 import com.viniciuscastro.clients.GoogleSlidesClient;
@@ -30,7 +29,6 @@ import com.viniciuscastro.presentation.resources.MimeType;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.vertx.mutiny.pgclient.PgPool;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 
@@ -47,17 +45,15 @@ public class PresentationService {
     @Inject
     GoogleCloudStorageResource googleCloudStorageResource;
 
-    @Inject
-    PgPool client;
-
     Logger logger = LoggerFactory.getLogger(PresentationService.class);
 
-    public Uni<Long> importPresentations(String[] presentationIds) {
+    public Multi<BucketFile> importPresentations(String[] presentationIds) {
         return Multi.createFrom().items(presentationIds)
+            // .onItem().invoke(presentationId -> this.storePresentationOnDatabase(presentationId))
             .onItem().transformToMultiAndMerge(presentationId -> this.getAllThumbnails(presentationId))
             .onItem().transformToUniAndConcatenate(thumbnail -> this.getThumbnailBytes(thumbnail))
-            .onItem().transformToUniAndConcatenate(file -> this.storeThumbnailOnStorage(file))
-            .collect().with(Collectors.counting());
+            .onItem().transformToUniAndConcatenate(file -> this.storeThumbnailOnStorage(file));
+            // .onItem().transformToUniAndConcatenate(file -> this.storePresentationOnDatabase(file));
     }
 
     public Uni<DrivePage> findPresentationsFromDrive(String pageToken) {
@@ -73,7 +69,7 @@ public class PresentationService {
             try {
                 BufferedInputStream input = new BufferedInputStream(new URL(thumbnail.getContentUrl()).openStream());
                 byte[] content = input.readAllBytes();
-                return new BucketFile(thumbnail.getPresentationId() + "/" + thumbnail.getPageObjectId(), "image/png", content);
+                return new BucketFile(thumbnail.getPresentationId() + "/" + thumbnail.getPageObjectId(), "image/png", content, thumbnail);
             } catch (IOException e) {
                 // Melhor lançar uma excenção e trata-la em um middleware
                 return null;
@@ -81,9 +77,16 @@ public class PresentationService {
         });
     }
 
-    private Uni<BlobId> storeThumbnailOnStorage(BucketFile file) {
+    private Uni<BucketFile> storeThumbnailOnStorage(BucketFile file) {
         return Uni.createFrom().item(() -> this.googleCloudStorageResource.storage(file));
     }
+
+    // private Uni<String> storePresentationOnDatabase(String presentationId) {
+        // return this.client.preparedQuery("INSERT INTO presentations (presentation_id) VALUES ($1) RETURNING (presentation_id)")
+        //     .execute(Tuple.of(presentationId))
+        //     .map(RowSet::iterator)
+        //     .map(it -> it.hasNext() ? it.next().getString("presentationId") : null);
+    // }
 
     private Multi<Thumbnail> getAllThumbnails(String presentationId) {
         Uni<Presentation> slideInformation = this.findPresentationInformation(presentationId);

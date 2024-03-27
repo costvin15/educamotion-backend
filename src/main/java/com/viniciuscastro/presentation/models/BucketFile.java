@@ -9,4 +9,5 @@ public class BucketFile {
     private String filename;
     private String contentType;
     private byte[] content;
+    private Thumbnail thumbnail;
 }

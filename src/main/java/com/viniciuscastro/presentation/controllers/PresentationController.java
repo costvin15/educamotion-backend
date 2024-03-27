@@ -1,12 +1,16 @@
 package com.viniciuscastro.presentation.controllers;
 
+import java.util.UUID;
+
 import com.viniciuscastro.clients.models.Presentation;
 import com.viniciuscastro.clients.models.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;
+import com.viniciuscastro.presentation.models.BucketFile;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.services.PresentationService;
 
 import io.quarkus.security.Authenticated;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -26,7 +30,7 @@ public class PresentationController {
     @POST
     @Path("import")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Long> importPresentations(ImportPresentation request) {
+    public Multi<BucketFile> importPresentations(ImportPresentation request) {
         return this.slidesService.importPresentations(request.getPresentationIds());
     }
 
