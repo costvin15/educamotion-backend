@@ -3,11 +3,13 @@ package com.viniciuscastro.presentation.services;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.cloud.storage.BlobId;
 import com.viniciuscastro.clients.GoogleCloudStorageResource;
 import com.viniciuscastro.clients.GoogleDriveClient;
 import com.viniciuscastro.clients.GoogleSlidesClient;
@@ -20,14 +22,15 @@ import com.viniciuscastro.clients.models.requests.CreateSlideRequest;
 import com.viniciuscastro.clients.models.requests.LayoutReference;
 import com.viniciuscastro.clients.models.requests.Request;
 import com.viniciuscastro.clients.models.requests.LayoutReference.PredefinedLayout;
-import com.viniciuscastro.presentation.controllers.PresentationController;
 import com.viniciuscastro.presentation.models.BucketFile;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DrivePage;
+import com.viniciuscastro.presentation.models.Thumbnail;
 import com.viniciuscastro.presentation.resources.MimeType;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.vertx.mutiny.pgclient.PgPool;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 
@@ -44,59 +47,62 @@ public class PresentationService {
     @Inject
     GoogleCloudStorageResource googleCloudStorageResource;
 
-    Logger logger = LoggerFactory.getLogger(PresentationController.class);
+    @Inject
+    PgPool client;
 
-    public PresentationThumbnail getThumbnailBlocking(String presentationId) {
-        Presentation presentation = this.slidesClient.getPresentationBlocking(presentationId);
-        if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
-            return null;
-        }
-        PresentationThumbnail thumbnail = this.slidesClient.getPresentationThumbnailBlocking(presentationId, presentation.getSlides().get(0).getObjectId());
+    Logger logger = LoggerFactory.getLogger(PresentationService.class);
 
-        logger.info(thumbnail.getContentUrl());
-        try {
-            BufferedInputStream input = new BufferedInputStream(new URL(thumbnail.getContentUrl()).openStream());
-            byte[] content = input.readAllBytes();
-            BucketFile file = new BucketFile("thumbnail2.png", "image/png", content);
-            this.googleCloudStorageResource.storage(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return thumbnail;
+    public Uni<Long> importPresentations(String[] presentationIds) {
+        return Multi.createFrom().items(presentationIds)
+            .onItem().transformToMultiAndMerge(presentationId -> this.getAllThumbnails(presentationId))
+            .onItem().transformToUniAndConcatenate(thumbnail -> this.getThumbnailBytes(thumbnail))
+            .onItem().transformToUniAndConcatenate(file -> this.storeThumbnailOnStorage(file))
+            .collect().with(Collectors.counting());
     }
 
-    public Uni<PresentationThumbnail> getThumbnail(String presentationId) {
-        Uni<Presentation> slideInformation = this.findPresentationInformation(presentationId);
-        return slideInformation.onItem().transformToUni(presentation -> {
-            if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
-                return Uni.createFrom().nullItem();
-            }
-            return this.slidesClient.getPresentationThumbnail(presentationId, presentation.getSlides().get(0).getObjectId());
-        });
-    }
-
-    public Multi<PresentationThumbnail> getAllThumbnails(String presentationId) {
-        Uni<Presentation> slideInformation = this.findPresentationInformation(presentationId);
-        Multi<PresentationThumbnail> thumbnails = slideInformation.onItem().transformToMulti(presentation -> {
-            if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
-                return Multi.createFrom().empty();
-            }
-            
-            return Multi.createFrom().iterable(presentation.getSlides())
-                .onItem()
-                .transformToUni(slideItem -> this.slidesClient.getPresentationThumbnail(presentationId, slideItem.getObjectId()))
-                .merge();
-        });
-        return thumbnails;
+    public Uni<DrivePage> findPresentationsFromDrive(String pageToken) {
+        return this.driveClient.findFiles(new Drive(MimeType.PRESENTATION, pageToken, 30));
     }
 
     public Uni<Presentation> findPresentationInformation(String presentationId) {
         return this.slidesClient.getPresentation(presentationId);
     }
 
-    public Uni<DrivePage> findPresentationsFromDrive(String pageToken) {
-        return this.driveClient.findFiles(new Drive(MimeType.PRESENTATION, pageToken, 30));
+    private Uni<BucketFile> getThumbnailBytes(Thumbnail thumbnail) {
+        return Uni.createFrom().item(() -> {
+            try {
+                BufferedInputStream input = new BufferedInputStream(new URL(thumbnail.getContentUrl()).openStream());
+                byte[] content = input.readAllBytes();
+                return new BucketFile(thumbnail.getPresentationId() + "/" + thumbnail.getPageObjectId(), "image/png", content);
+            } catch (IOException e) {
+                // Melhor lançar uma excenção e trata-la em um middleware
+                return null;
+            }
+        });
+    }
+
+    private Uni<BlobId> storeThumbnailOnStorage(BucketFile file) {
+        return Uni.createFrom().item(() -> this.googleCloudStorageResource.storage(file));
+    }
+
+    private Multi<Thumbnail> getAllThumbnails(String presentationId) {
+        Uni<Presentation> slideInformation = this.findPresentationInformation(presentationId);
+        return slideInformation.onItem().transformToMulti(presentation -> {
+            if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
+                return Multi.createFrom().empty();
+            }
+            
+            return Multi.createFrom().iterable(presentation.getSlides())
+                .onItem()
+                .transformToUni(slideItem -> {
+                    String objectId = slideItem.getObjectId();
+                    Uni<PresentationThumbnail> presentationThumbnail = this.slidesClient.getPresentationThumbnail(presentationId, slideItem.getObjectId());
+                    return presentationThumbnail.onItem().transformToUni(thumbnail -> {
+                        return Uni.createFrom().item(() -> new Thumbnail(presentationId, objectId, thumbnail.getContentUrl()));
+                    });
+                })
+                .merge();
+        });
     }
 
     /**

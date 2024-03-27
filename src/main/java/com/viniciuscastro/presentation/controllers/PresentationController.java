@@ -1,16 +1,16 @@
 package com.viniciuscastro.presentation.controllers;
 
 import com.viniciuscastro.clients.models.Presentation;
-import com.viniciuscastro.clients.models.PresentationThumbnail;
 import com.viniciuscastro.clients.models.PresentationUpdateResponse;
+import com.viniciuscastro.presentation.dto.request.ImportPresentation;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.services.PresentationService;
 
 import io.quarkus.security.Authenticated;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -23,6 +23,13 @@ public class PresentationController {
     @Inject
     PresentationService slidesService;
 
+    @POST
+    @Path("import")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Long> importPresentations(ImportPresentation request) {
+        return this.slidesService.importPresentations(request.getPresentationIds());
+    }
+
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
@@ -34,20 +41,6 @@ public class PresentationController {
     @Path("{presentationId}")
     public Uni<Presentation> findPresentationInformation(@PathParam("presentationId") String presentationId) {
         return this.slidesService.findPresentationInformation(presentationId);
-    }
-
-    @GET
-    @Path("thumbnail/{presentationId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public PresentationThumbnail getThumbnail(@PathParam("presentationId") String presentationId) {
-        return this.slidesService.getThumbnailBlocking(presentationId);
-    }
-
-    @GET
-    @Path("thumbnails/{presentationId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Multi<PresentationThumbnail> getThumbnails(@PathParam("presentationId") String presentationId) {
-        return this.slidesService.getAllThumbnails(presentationId);
     }
 
     @GET

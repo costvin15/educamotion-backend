@@ -1,5 +1,6 @@
 package com.viniciuscastro.clients;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import com.viniciuscastro.clients.models.Presentation;
@@ -43,6 +44,7 @@ public interface GoogleSlidesClient {
     @Path("/{presentationId}/pages/{pageObjectId}/thumbnail")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Retry(maxRetries = 100, delay = 10000, maxDuration = 100000, jitter = 10000, retryOn = { Exception.class } )
     Uni<PresentationThumbnail> getPresentationThumbnail(@PathParam("presentationId") String presentationId, @PathParam("pageObjectId") String pageObjectId);
 
     @POST

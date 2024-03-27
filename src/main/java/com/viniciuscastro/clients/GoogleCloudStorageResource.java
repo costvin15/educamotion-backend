@@ -19,14 +19,15 @@ public class GoogleCloudStorageResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String storage(BucketFile file) {
+    public BlobId storage(BucketFile file) {
         String bucketName = "educamotion-presentation-images";
+
         BlobId blobId = BlobId.of(bucketName, file.getFilename());
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
             .setContentType(file.getContentType())
             .build();
         Blob blob = this.storage.create(blobInfo, file.getContent());
 
-        return new String(blob.getContent());
+        return blob.getBlobId();
     }
 }
