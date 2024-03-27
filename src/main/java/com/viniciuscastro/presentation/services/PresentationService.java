@@ -56,8 +56,8 @@ public class PresentationService {
             .onItem().transformToUniAndConcatenate(presentationId -> this.storePresentationOnDatabase(presentationId))
             .onItem().transformToMultiAndMerge(presentationId -> this.getAllThumbnails(presentationId))
             .onItem().transformToUniAndConcatenate(thumbnail -> this.getThumbnailBytes(thumbnail))
-            .onItem().transformToUniAndConcatenate(file -> this.storeThumbnailOnStorage(file));
-            // .onItem().transformToUniAndConcatenate(file -> this.storePresentationOnDatabase(file));
+            .onItem().transformToUniAndConcatenate(file -> this.storeThumbnailOnStorage(file))
+            .onItem().transformToUniAndConcatenate(file -> this.storageThumbnailOnDatabase(file));
     }
 
     public Uni<DrivePage> findPresentationsFromDrive(String pageToken) {
@@ -86,15 +86,12 @@ public class PresentationService {
     }
 
     private Uni<String> storePresentationOnDatabase(String presentationId) {
-        return Uni.createFrom().item(() -> this.googleFirestoreResource.firestore(presentationId));
+        return Uni.createFrom().item(() -> this.googleFirestoreResource.storagePresentation(presentationId));
     }
 
-    // private Uni<String> storePresentationOnDatabase(String presentationId) {
-        // return this.client.preparedQuery("INSERT INTO presentations (presentation_id) VALUES ($1) RETURNING (presentation_id)")
-        //     .execute(Tuple.of(presentationId))
-        //     .map(RowSet::iterator)
-        //     .map(it -> it.hasNext() ? it.next().getString("presentationId") : null);
-    // }
+    private Uni<BucketFile> storageThumbnailOnDatabase(BucketFile file) {
+        return Uni.createFrom().item(() -> this.googleFirestoreResource.storageThumbnail(file));
+    }
 
     private Multi<Thumbnail> getAllThumbnails(String presentationId) {
         Uni<Presentation> slideInformation = this.findPresentationInformation(presentationId);

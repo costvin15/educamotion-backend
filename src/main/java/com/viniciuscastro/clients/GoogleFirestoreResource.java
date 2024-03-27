@@ -5,6 +5,8 @@ import java.util.concurrent.ExecutionException;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.Firestore;
 import com.viniciuscastro.clients.models.requests.PresentationFirestore;
+import com.viniciuscastro.clients.models.requests.ThumbnailFirestore;
+import com.viniciuscastro.presentation.models.BucketFile;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -19,7 +21,7 @@ public class GoogleFirestoreResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String firestore(String presentationId) {
+    public String storagePresentation(String presentationId) {
         CollectionReference presentations = firestore.collection("presentations");
         try {
             presentations.add(new PresentationFirestore(presentationId))
@@ -28,5 +30,16 @@ public class GoogleFirestoreResource {
             e.printStackTrace();
         }
         return presentationId;
+    }
+
+    public BucketFile storageThumbnail(BucketFile file) {
+        CollectionReference presentations = firestore.collection("thumbnails");
+        try {
+            presentations.add(new ThumbnailFirestore(file.getThumbnail().getPresentationId(), file.getThumbnail().getPageObjectId()))
+                .get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return file;
     }
 }
