@@ -17,7 +17,7 @@ public class GoogleCloudStorageResource {
     Storage storage;
 
     @GET
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     public BucketFile storage(BucketFile file) {
         String bucketName = "educamotion-presentation-images";
 

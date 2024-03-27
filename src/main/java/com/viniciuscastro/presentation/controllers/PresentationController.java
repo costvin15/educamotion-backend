@@ -1,7 +1,5 @@
 package com.viniciuscastro.presentation.controllers;
 
-import java.util.UUID;
-
 import com.viniciuscastro.clients.models.Presentation;
 import com.viniciuscastro.clients.models.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;

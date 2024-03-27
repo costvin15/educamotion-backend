@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.viniciuscastro.clients.GoogleCloudStorageResource;
 import com.viniciuscastro.clients.GoogleDriveClient;
+import com.viniciuscastro.clients.GoogleFirestoreResource;
 import com.viniciuscastro.clients.GoogleSlidesClient;
 import com.viniciuscastro.clients.models.Presentation;
 import com.viniciuscastro.clients.models.PresentationThumbnail;
@@ -45,11 +46,14 @@ public class PresentationService {
     @Inject
     GoogleCloudStorageResource googleCloudStorageResource;
 
+    @Inject
+    GoogleFirestoreResource googleFirestoreResource;
+
     Logger logger = LoggerFactory.getLogger(PresentationService.class);
 
     public Multi<BucketFile> importPresentations(String[] presentationIds) {
         return Multi.createFrom().items(presentationIds)
-            // .onItem().invoke(presentationId -> this.storePresentationOnDatabase(presentationId))
+            .onItem().transformToUniAndConcatenate(presentationId -> this.storePresentationOnDatabase(presentationId))
             .onItem().transformToMultiAndMerge(presentationId -> this.getAllThumbnails(presentationId))
             .onItem().transformToUniAndConcatenate(thumbnail -> this.getThumbnailBytes(thumbnail))
             .onItem().transformToUniAndConcatenate(file -> this.storeThumbnailOnStorage(file));
@@ -79,6 +83,10 @@ public class PresentationService {
 
     private Uni<BucketFile> storeThumbnailOnStorage(BucketFile file) {
         return Uni.createFrom().item(() -> this.googleCloudStorageResource.storage(file));
+    }
+
+    private Uni<String> storePresentationOnDatabase(String presentationId) {
+        return Uni.createFrom().item(() -> this.googleFirestoreResource.firestore(presentationId));
     }
 
     // private Uni<String> storePresentationOnDatabase(String presentationId) {
