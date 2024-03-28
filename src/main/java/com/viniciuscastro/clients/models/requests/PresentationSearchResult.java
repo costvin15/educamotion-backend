@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PresentationFirestore {
+public class PresentationSearchResult {
     private String presentationId;
+    private boolean exists;
 }
