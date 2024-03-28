@@ -70,7 +70,17 @@ public class PresentationService {
     }
 
     public Uni<Presentation> findPresentationInformation(String presentationId) {
-        return this.slidesClient.getPresentation(presentationId);
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(presentation -> this.findPresentation(presentationId))
+            .onItem().transformToUni(presentation -> {
+                if (presentation.isExists()) {
+                    logger.info("Presentation {} already exists", presentation.getPresentationId());
+                    return this.slidesClient.getPresentation(presentation.getPresentationId());
+                }
+
+                logger.info("Presentation {} didnt exists", presentation.getPresentationId());
+                return Uni.createFrom().nullItem();
+            });
     }
 
     private Uni<BucketFile> getThumbnailBytes(Thumbnail thumbnail) {
