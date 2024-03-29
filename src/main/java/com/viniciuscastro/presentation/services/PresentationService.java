@@ -24,6 +24,7 @@ import com.viniciuscastro.clients.models.requests.SlideLayoutReference.Predefine
 import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.exceptions.ApplicationException;
 import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
+import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
 import com.viniciuscastro.presentation.models.BucketFile;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DrivePage;
@@ -57,18 +58,18 @@ public class PresentationService {
         return this.driveClient.findFiles(new Drive(MimeType.PRESENTATION, pageToken, 30));
     }
 
-    public Multi<BucketFile> importPresentations(String[] presentationIds) {
+    public Uni<ImportResultResponse> importPresentations(String[] presentationIds) {
         return Multi.createFrom().items(presentationIds)
             .onItem().transformToUniAndConcatenate(presentationId -> this.findPresentation(presentationId))
             .onItem().transformToMultiAndConcatenate(presentation -> {
                 if (presentation.isExists()) {
-                    logger.info("Presentation {} already exists", presentation.getPresentationId());
                     return Multi.createFrom().empty();
                 }
 
-                logger.info("Presentation {} didnt exists", presentation.getPresentationId());
                 return this.getPresentationInformationAndStore(presentation.getPresentationId());
-            });
+            })
+            .collect().asList()
+            .onItem().transformToUni(result -> Uni.createFrom().item(new ImportResultResponse(result.size())));
     }
 
     public Uni<GooglePresentation> findPresentationInformation(String presentationId) {

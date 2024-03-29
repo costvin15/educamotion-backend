@@ -3,7 +3,7 @@ package com.viniciuscastro.presentation.controllers;
 import com.viniciuscastro.clients.models.GooglePresentation;
 import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;
-import com.viniciuscastro.presentation.models.BucketFile;
+import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.services.PresentationService;
 
@@ -35,7 +35,7 @@ public class PresentationController {
     @POST
     @Path("import")
     @Produces(MediaType.APPLICATION_JSON)
-    public Multi<BucketFile> importPresentations(ImportPresentation request) {
+    public Uni<ImportResultResponse> importPresentations(ImportPresentation request) {
         return this.slidesService.importPresentations(request.getPresentationIds());
     }
 
