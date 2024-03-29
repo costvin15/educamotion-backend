@@ -25,6 +25,7 @@ import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.exceptions.ApplicationException;
 import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
 import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
+import com.viniciuscastro.presentation.dto.response.Presentation;
 import com.viniciuscastro.presentation.models.BucketFile;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DrivePage;
@@ -54,8 +55,27 @@ public class PresentationService {
 
     Logger logger = LoggerFactory.getLogger(PresentationService.class);
 
-    public Uni<DrivePage> findPresentationsFromDrive(String pageToken) {
+    public Uni<DrivePage> findPresentationsAvailableForImport(String pageToken) {
         return this.driveClient.findFiles(new Drive(MimeType.PRESENTATION, pageToken, 30));
+    }
+
+    public Uni<Presentation> getPresentationById(String presentationId) {
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(presentation -> this.getImportedPresentationInformation(presentationId))
+            .onItem().transformToUni(presentation -> {
+                if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
+                    throw new ApplicationException("Apresentação não possui slides.", StatusCode.NO_CONTENT);
+                }
+
+                String objectId = presentation.getSlides().get(0).getObjectId();
+                // TODO: Atualmente isto esta utilizando uma rota com limitação de uso. É necessário
+                // refatorar para utilização da rota do Bucket. 
+                return this.slidesClient.getPresentationThumbnail(presentation.getPresentationId(), objectId)
+                    .onItem().transformToUni(thumbnail -> {
+                        Presentation response = new Presentation(presentationId, presentation.getTitle(), thumbnail.getContentUrl());
+                        return Uni.createFrom().item(response);
+                    });
+            });
     }
 
     public Uni<ImportResultResponse> importPresentations(String[] presentationIds) {
@@ -72,7 +92,12 @@ public class PresentationService {
             .onItem().transformToUni(result -> Uni.createFrom().item(new ImportResultResponse(result.size())));
     }
 
-    public Uni<GooglePresentation> findPresentationInformation(String presentationId) {
+    public Multi<GooglePresentation> searchAllImportedPresentations() {
+        return Multi.createFrom().items(this.googleFirestoreResource.searchAllImportedPresentations())
+            .onItem().transformToUniAndConcatenate(presentation -> this.slidesClient.getPresentation(presentation.getPresentationId()));
+    }
+
+    private Uni<GooglePresentation> getImportedPresentationInformation(String presentationId) {
         return Uni.createFrom().item(presentationId)
             .onItem().transformToUni(presentation -> this.findPresentation(presentationId))
             .onItem().transformToUni(presentation -> {
@@ -82,11 +107,6 @@ public class PresentationService {
 
                 throw new ApplicationException("Apresentação não encontrada.", StatusCode.NOT_FOUND);
             });
-    }
-
-    public Multi<GooglePresentation> searchAllImportedPresentations() {
-        return Multi.createFrom().items(this.googleFirestoreResource.searchAllImportedPresentations())
-            .onItem().transformToUniAndConcatenate(presentation -> this.slidesClient.getPresentation(presentation.getPresentationId()));
     }
 
     private Uni<BucketFile> getThumbnailBytes(Thumbnail thumbnail) {
@@ -132,7 +152,7 @@ public class PresentationService {
     }
 
     private Multi<Thumbnail> getAllThumbnails(String presentationId) {
-        Uni<GooglePresentation> slideInformation = this.findPresentationInformation(presentationId);
+        Uni<GooglePresentation> slideInformation = this.getImportedPresentationInformation(presentationId);
         return slideInformation.onItem().transformToMulti(presentation -> {
             if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
                 return Multi.createFrom().empty();
@@ -156,7 +176,7 @@ public class PresentationService {
      * editar esse slide (Por exemplo: O slide foi compartilhado com ele apenas para visualização)
      */
     public Uni<PresentationUpdateResponse> createSlidePage(String presentationId) {
-        Uni<GooglePresentation> presentationInformation = this.findPresentationInformation(presentationId);
+        Uni<GooglePresentation> presentationInformation = this.getImportedPresentationInformation(presentationId);
         return presentationInformation.onItem().transformToUni(presentation -> {
             SlideLayoutReference layoutReference = new SlideLayoutReference(PredefinedLayout.TITLE_AND_TWO_COLUMNS, null);
             CreateSlideBodyRequest createSlideRequest = new CreateSlideBodyRequest(null, 0, layoutReference, null);

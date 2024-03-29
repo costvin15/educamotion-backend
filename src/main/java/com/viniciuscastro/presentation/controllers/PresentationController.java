@@ -4,6 +4,7 @@ import com.viniciuscastro.clients.models.GooglePresentation;
 import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;
 import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
+import com.viniciuscastro.presentation.dto.response.Presentation;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.services.PresentationService;
 
@@ -23,39 +24,39 @@ import jakarta.ws.rs.core.MediaType;
 @Path("presentation")
 public class PresentationController {
     @Inject
-    PresentationService slidesService;
+    PresentationService service;
 
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<DrivePage> findPage(@QueryParam("pageToken") String pageToken) {
-        return this.slidesService.findPresentationsFromDrive(pageToken);
+        return service.findPresentationsAvailableForImport(pageToken);
     }
 
     @POST
     @Path("import")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<ImportResultResponse> importPresentations(ImportPresentation request) {
-        return this.slidesService.importPresentations(request.getPresentationIds());
+        return service.importPresentations(request.getPresentationIds());
     }
 
     @GET
     @Path("{presentationId}")
-    public Uni<GooglePresentation> findPresentationInformation(@PathParam("presentationId") String presentationId) {
-        return this.slidesService.findPresentationInformation(presentationId);
+    public Uni<Presentation> findPresentationInformation(@PathParam("presentationId") String presentationId) {
+        return service.getPresentationById(presentationId);
     }
 
     @GET
     @Path("imported")
     @Produces(MediaType.APPLICATION_JSON)
     public Multi<GooglePresentation> findImportedPresentations() {
-        return this.slidesService.searchAllImportedPresentations();
+        return service.searchAllImportedPresentations();
     }
 
     @GET
     @Path("create/{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<PresentationUpdateResponse> createSlide(@PathParam("presentationId") String presentationId) {
-        return this.slidesService.createSlidePage(presentationId);
+        return service.createSlidePage(presentationId);
     }
 }
