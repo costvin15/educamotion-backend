@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class CreateSlideResponse {
-    private String objectId;
+    private CreateSlideBodyResponse createSlide;
 }

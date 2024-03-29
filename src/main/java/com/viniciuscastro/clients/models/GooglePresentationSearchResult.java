@@ -1,11 +1,11 @@
-package com.viniciuscastro.clients.models.requests;
+package com.viniciuscastro.clients.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ThumbnailFirestore {
+public class GooglePresentationSearchResult {
     private String presentationId;
-    private String objectId;
+    private boolean exists;
 }

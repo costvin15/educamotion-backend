@@ -1,4 +1,4 @@
-package com.viniciuscastro.clients.models;
+package com.viniciuscastro.clients.models.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class WriteControl {
-    private String requiredRevisionId;
+public class CreateSlideBodyResponse {
+    private String objectId;
 }

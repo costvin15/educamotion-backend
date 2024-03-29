@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PresentationFirestore {
+public class StorePresentationRequest {
     private String presentationId;
+    private String userId;
 }

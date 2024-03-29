@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PresentationSearchResult {
+public class StoreThumbnailRequest {
     private String presentationId;
-    private boolean exists;
+    private String objectId;
 }

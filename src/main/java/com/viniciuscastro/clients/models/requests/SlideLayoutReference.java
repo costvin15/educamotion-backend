@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class LayoutReference {
+public class SlideLayoutReference {
     private PredefinedLayout predefinedLayout;
     private String layoutId;
 

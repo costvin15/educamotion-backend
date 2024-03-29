@@ -1,7 +1,7 @@
 package com.viniciuscastro.presentation.controllers;
 
-import com.viniciuscastro.clients.models.Presentation;
-import com.viniciuscastro.clients.models.PresentationUpdateResponse;
+import com.viniciuscastro.clients.models.GooglePresentation;
+import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;
 import com.viniciuscastro.presentation.models.BucketFile;
 import com.viniciuscastro.presentation.models.DrivePage;
@@ -25,6 +25,13 @@ public class PresentationController {
     @Inject
     PresentationService slidesService;
 
+    @GET
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<DrivePage> findPage(@QueryParam("pageToken") String pageToken) {
+        return this.slidesService.findPresentationsFromDrive(pageToken);
+    }
+
     @POST
     @Path("import")
     @Produces(MediaType.APPLICATION_JSON)
@@ -33,16 +40,16 @@ public class PresentationController {
     }
 
     @GET
-    @Path("")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Uni<DrivePage> findPage(@QueryParam("pageToken") String pageToken) {
-        return this.slidesService.findPresentationsFromDrive(pageToken);
+    @Path("{presentationId}")
+    public Uni<GooglePresentation> findPresentationInformation(@PathParam("presentationId") String presentationId) {
+        return this.slidesService.findPresentationInformation(presentationId);
     }
 
     @GET
-    @Path("{presentationId}")
-    public Uni<Presentation> findPresentationInformation(@PathParam("presentationId") String presentationId) {
-        return this.slidesService.findPresentationInformation(presentationId);
+    @Path("imported")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Multi<GooglePresentation> findImportedPresentations() {
+        return this.slidesService.searchAllImportedPresentations();
     }
 
     @GET

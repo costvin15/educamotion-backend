@@ -1,7 +1,5 @@
 package com.viniciuscastro.clients.models;
 
-import com.viniciuscastro.clients.models.requests.Request;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +7,8 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class PresentationUpdate {
-    Request[] requests;
-    WriteControl writeControl;
+public class GoogleThumbnail {
+    private Integer width;
+    private Integer height;
+    private String contentUrl;
 }

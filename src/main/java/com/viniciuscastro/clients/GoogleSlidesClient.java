@@ -3,10 +3,10 @@ package com.viniciuscastro.clients;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-import com.viniciuscastro.clients.models.Presentation;
-import com.viniciuscastro.clients.models.PresentationThumbnail;
-import com.viniciuscastro.clients.models.PresentationUpdate;
-import com.viniciuscastro.clients.models.PresentationUpdateResponse;
+import com.viniciuscastro.clients.models.GooglePresentation;
+import com.viniciuscastro.clients.models.GoogleThumbnail;
+import com.viniciuscastro.clients.models.requests.PresentationUpdateRequest;
+import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 
 import io.quarkus.oidc.token.propagation.AccessToken;
 import io.smallrye.mutiny.Uni;
@@ -26,28 +26,28 @@ public interface GoogleSlidesClient {
     @Path("/{presentationId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Uni<Presentation> getPresentation(@PathParam("presentationId") String presentationId);
+    Uni<GooglePresentation> getPresentation(@PathParam("presentationId") String presentationId);
 
     @GET
     @Path("/{presentationId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    Presentation getPresentationBlocking(@PathParam("presentationId") String presentationId);
+    GooglePresentation getPresentationBlocking(@PathParam("presentationId") String presentationId);
 
     @GET
     @Path("/{presentationId}/pages/{pageObjectId}/thumbnail")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    PresentationThumbnail getPresentationThumbnailBlocking(@PathParam("presentationId") String presentationId, @PathParam("pageObjectId") String pageObjectId);
+    GoogleThumbnail getPresentationThumbnailBlocking(@PathParam("presentationId") String presentationId, @PathParam("pageObjectId") String pageObjectId);
 
     @GET
     @Path("/{presentationId}/pages/{pageObjectId}/thumbnail")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 100, delay = 10000, maxDuration = 100000, jitter = 10000, retryOn = { Exception.class } )
-    Uni<PresentationThumbnail> getPresentationThumbnail(@PathParam("presentationId") String presentationId, @PathParam("pageObjectId") String pageObjectId);
+    Uni<GoogleThumbnail> getPresentationThumbnail(@PathParam("presentationId") String presentationId, @PathParam("pageObjectId") String pageObjectId);
 
     @POST
     @Path("/{presentationId}:batchUpdate")
-    Uni<PresentationUpdateResponse> performBatchUpdate(@PathParam("presentationId") String presentationId, PresentationUpdate presentationUpdate);
+    Uni<PresentationUpdateResponse> performBatchUpdate(@PathParam("presentationId") String presentationId, PresentationUpdateRequest presentationUpdate);
 }

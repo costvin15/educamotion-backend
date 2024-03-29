@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class Presentation {
+public class GooglePresentation {
     private String presentationId;
     private String title;
     private List<PresentationPage> slides;

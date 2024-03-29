@@ -1,6 +1,6 @@
-package com.viniciuscastro.clients.models;
+package com.viniciuscastro.clients.models.responses;
 
-import com.viniciuscastro.clients.models.responses.Response;
+import com.viniciuscastro.clients.models.WriteControlBody;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +11,6 @@ import lombok.Getter;
 @Getter
 public class PresentationUpdateResponse {
     private String presentationId;
-    private Response[] replies;
-    private WriteControl writeControl;
+    private CreateSlideResponse[] replies;
+    private WriteControlBody writeControl;
 }
