@@ -68,11 +68,12 @@ public class PresentationService {
                 }
 
                 String objectId = presentation.getSlides().get(0).getObjectId();
-                // TODO: Atualmente isto esta utilizando uma rota com limitação de uso. É necessário
-                // refatorar para utilização da rota do Bucket. 
-                return this.slidesClient.getPresentationThumbnail(presentation.getPresentationId(), objectId)
-                    .onItem().transformToUni(thumbnail -> {
-                        Presentation response = new Presentation(presentationId, presentation.getTitle(), thumbnail.getContentUrl());
+                // TODO: Atualmente isto esta retornando partes dos bytes da imagem.
+                // É necessário criar uma rota que exclusiva para buscar a imagem.
+                BucketFile file = new BucketFile(presentationId, objectId);
+                return Uni.createFrom().item(this.googleCloudStorageResource.getFileFromImagesBucket(file))
+                    .onItem().transformToUni(thumbnailUrl -> {
+                        Presentation response = new Presentation(presentationId, presentation.getTitle(), thumbnailUrl.toString());
                         return Uni.createFrom().item(response);
                     });
             });
@@ -114,7 +115,7 @@ public class PresentationService {
             try {
                 BufferedInputStream input = new BufferedInputStream(new URL(thumbnail.getContentUrl()).openStream());
                 byte[] content = input.readAllBytes();
-                return new BucketFile(thumbnail.getPresentationId() + "/" + thumbnail.getPageObjectId(), "image/png", content, thumbnail);
+                return new BucketFile(thumbnail.getPresentationId(), thumbnail.getPageObjectId(), content, thumbnail);
             } catch (IOException e) {
                 throw new ApplicationException("Ocorreu um erro ao importar a imagem.", StatusCode.INTERNAL_SERVER_ERROR);
             }
@@ -136,7 +137,7 @@ public class PresentationService {
     }
 
     private Uni<BucketFile> storeThumbnailOnStorage(BucketFile file) {
-        return Uni.createFrom().item(() -> this.googleCloudStorageResource.storage(file));
+        return Uni.createFrom().item(() -> this.googleCloudStorageResource.storeFileOnImagesBucket(file));
     }
 
     private Uni<String> storePresentationOnDatabase(String presentationId) {

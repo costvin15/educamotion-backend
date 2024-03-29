@@ -28,10 +28,14 @@ public class GoogleFirestoreResource {
     @Inject
     UserInfo userInfo;
 
+    private static final String PRESENTATION_COLLECTION = "presentations";
+    private static final String THUMBNAIL_COLLECTION = "thumbnail";
+
     @GET
+    @Path("storePresentation")
     @Produces(MediaType.APPLICATION_JSON)
     public String storePresentation(String presentationId) {
-        CollectionReference presentations = firestore.collection("presentations");
+        CollectionReference presentations = firestore.collection(PRESENTATION_COLLECTION);
         try {
             presentations.add(new StorePresentationRequest(presentationId, userInfo.getSubject()))
                 .get();
@@ -41,8 +45,11 @@ public class GoogleFirestoreResource {
         return presentationId;
     }
 
+    @GET
+    @Path("storeThumbnail")
+    @Produces(MediaType.APPLICATION_JSON)
     public BucketFile storeThumbnail(BucketFile file) {
-        CollectionReference presentations = firestore.collection("thumbnails");
+        CollectionReference presentations = firestore.collection(THUMBNAIL_COLLECTION);
         try {
             presentations.add(new StoreThumbnailRequest(file.getThumbnail().getPresentationId(), file.getThumbnail().getPageObjectId()))
                 .get();
@@ -52,8 +59,11 @@ public class GoogleFirestoreResource {
         return file;
     }
 
+    @GET
+    @Path("searchPresentation")
+    @Produces(MediaType.APPLICATION_JSON)
     public GooglePresentationSearchResult searchPresentation(String presentationId) {
-        CollectionReference presentations = firestore.collection("presentations");
+        CollectionReference presentations = firestore.collection(PRESENTATION_COLLECTION);
         try {
             return presentations.whereEqualTo("presentationId", presentationId)
                 .whereEqualTo("userId", userInfo.getSubject())
@@ -69,8 +79,11 @@ public class GoogleFirestoreResource {
         }
     }
 
+    @GET
+    @Path("searchAllImportedPresentations")
+    @Produces(MediaType.APPLICATION_JSON)
     public Stream<GooglePresentationSearchResult> searchAllImportedPresentations() {
-        CollectionReference presentations = firestore.collection("presentations");
+        CollectionReference presentations = firestore.collection(PRESENTATION_COLLECTION);
         try {
             return presentations.whereEqualTo("userId", userInfo.getSubject())
                 .get()
