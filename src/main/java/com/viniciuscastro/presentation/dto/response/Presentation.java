@@ -8,5 +8,4 @@ import lombok.Getter;
 public class Presentation {
     private String presentationId;
     private String title;
-    private String image;
 }

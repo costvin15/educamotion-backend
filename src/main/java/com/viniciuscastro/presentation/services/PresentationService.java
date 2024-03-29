@@ -1,6 +1,7 @@
 package com.viniciuscastro.presentation.services;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 
@@ -67,15 +68,22 @@ public class PresentationService {
                     throw new ApplicationException("Apresentação não possui slides.", StatusCode.NO_CONTENT);
                 }
 
+                Presentation response = new Presentation(presentationId, presentation.getTitle());
+                return Uni.createFrom().item(response);
+            });
+    }
+
+    public Uni<ByteArrayInputStream> getThumbnail(String presentationId) {
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(presentation -> this.getImportedPresentationInformation(presentationId))
+            .onItem().transformToUni(presentation -> {
+                if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
+                    throw new ApplicationException("Apresentação não possui slides.", StatusCode.NO_CONTENT);
+                }
+
                 String objectId = presentation.getSlides().get(0).getObjectId();
-                // TODO: Atualmente isto esta retornando partes dos bytes da imagem.
-                // É necessário criar uma rota que exclusiva para buscar a imagem.
                 BucketFile file = new BucketFile(presentationId, objectId);
-                return Uni.createFrom().item(this.googleCloudStorageResource.getFileFromImagesBucket(file))
-                    .onItem().transformToUni(thumbnailUrl -> {
-                        Presentation response = new Presentation(presentationId, presentation.getTitle(), thumbnailUrl.toString());
-                        return Uni.createFrom().item(response);
-                    });
+                return Uni.createFrom().item(this.googleCloudStorageResource.getFileFromImagesBucket(file));
             });
     }
 

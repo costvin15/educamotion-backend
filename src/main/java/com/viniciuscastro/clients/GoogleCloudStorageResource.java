@@ -1,5 +1,7 @@
 package com.viniciuscastro.clients;
 
+import java.io.ByteArrayInputStream;
+
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
@@ -36,9 +38,10 @@ public class GoogleCloudStorageResource {
     @GET
     @Path("getFile")
     @Produces(MediaType.APPLICATION_JSON)
-    public byte[] getFileFromImagesBucket(BucketFile file) {
+    public ByteArrayInputStream getFileFromImagesBucket(BucketFile file) {
         BlobId blobId = BlobId.of(BUCKET_NAME, file.getFilename());
         Blob blob = this.storage.get(blobId);
-        return blob.getContent(BlobSourceOption.generationMatch());
+        byte[] bytes = blob.getContent(BlobSourceOption.generationMatch());
+        return new ByteArrayInputStream(bytes);
     }
 }

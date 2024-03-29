@@ -1,5 +1,7 @@
 package com.viniciuscastro.presentation.controllers;
 
+import java.io.ByteArrayInputStream;
+
 import com.viniciuscastro.clients.models.GooglePresentation;
 import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;
@@ -42,8 +44,16 @@ public class PresentationController {
 
     @GET
     @Path("{presentationId}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Uni<Presentation> findPresentationInformation(@PathParam("presentationId") String presentationId) {
         return service.getPresentationById(presentationId);
+    }
+
+    @GET
+    @Path("thumbnail/{presentationId}")
+    @Produces("image/png")
+    public Uni<ByteArrayInputStream> findThumbnail(@PathParam("presentationId") String presentationId) {
+        return service.getThumbnail(presentationId);
     }
 
     @GET
