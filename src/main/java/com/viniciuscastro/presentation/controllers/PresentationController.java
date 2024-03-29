@@ -11,7 +11,6 @@ import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.services.PresentationService;
 
 import io.quarkus.security.Authenticated;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;

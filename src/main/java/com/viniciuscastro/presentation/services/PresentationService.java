@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
