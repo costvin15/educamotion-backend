@@ -2,11 +2,11 @@ package com.viniciuscastro.presentation.controllers;
 
 import java.io.ByteArrayInputStream;
 
-import com.viniciuscastro.clients.models.GooglePresentation;
 import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;
 import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
-import com.viniciuscastro.presentation.dto.response.Presentation;
+import com.viniciuscastro.presentation.dto.response.PresentationListResponse;
+import com.viniciuscastro.presentation.dto.response.PresentationResponse;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.services.PresentationService;
 
@@ -45,7 +45,7 @@ public class PresentationController {
     @GET
     @Path("{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Presentation> findPresentationInformation(@PathParam("presentationId") String presentationId) {
+    public Uni<PresentationResponse> findPresentationInformation(@PathParam("presentationId") String presentationId) {
         return service.getPresentationById(presentationId);
     }
 
@@ -59,7 +59,7 @@ public class PresentationController {
     @GET
     @Path("imported")
     @Produces(MediaType.APPLICATION_JSON)
-    public Multi<GooglePresentation> findImportedPresentations() {
+    public Uni<PresentationListResponse> findImportedPresentations() {
         return service.searchAllImportedPresentations();
     }
 

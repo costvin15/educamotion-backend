@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class Presentation {
+public class PresentationResponse {
     private String presentationId;
     private String title;
 }

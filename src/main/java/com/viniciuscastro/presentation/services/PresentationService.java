@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
@@ -26,7 +27,8 @@ import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.exceptions.ApplicationException;
 import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
 import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
-import com.viniciuscastro.presentation.dto.response.Presentation;
+import com.viniciuscastro.presentation.dto.response.PresentationListResponse;
+import com.viniciuscastro.presentation.dto.response.PresentationResponse;
 import com.viniciuscastro.presentation.models.BucketFile;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DrivePage;
@@ -60,7 +62,7 @@ public class PresentationService {
         return this.driveClient.findFiles(new Drive(MimeType.PRESENTATION, pageToken, 30));
     }
 
-    public Uni<Presentation> getPresentationById(String presentationId) {
+    public Uni<PresentationResponse> getPresentationById(String presentationId) {
         return Uni.createFrom().item(presentationId)
             .onItem().transformToUni(presentation -> this.getImportedPresentationInformation(presentationId))
             .onItem().transformToUni(presentation -> {
@@ -68,7 +70,7 @@ public class PresentationService {
                     throw new ApplicationException("Apresentação não possui slides.", StatusCode.NO_CONTENT);
                 }
 
-                Presentation response = new Presentation(presentationId, presentation.getTitle());
+                PresentationResponse response = new PresentationResponse(presentationId, presentation.getTitle());
                 return Uni.createFrom().item(response);
             });
     }
@@ -101,9 +103,19 @@ public class PresentationService {
             .onItem().transformToUni(result -> Uni.createFrom().item(new ImportResultResponse(result.size())));
     }
 
-    public Multi<GooglePresentation> searchAllImportedPresentations() {
+    public Uni<PresentationListResponse> searchAllImportedPresentations() {
         return Multi.createFrom().items(this.googleFirestoreResource.searchAllImportedPresentations())
-            .onItem().transformToUniAndConcatenate(presentation -> this.slidesClient.getPresentation(presentation.getPresentationId()));
+            .onItem().transformToUniAndConcatenate(presentation -> this.slidesClient.getPresentation(presentation.getPresentationId()))
+            .onItem().transformToUniAndConcatenate(presentation -> {
+                if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
+                    return Uni.createFrom().nullItem();
+                }
+
+                PresentationResponse response = new PresentationResponse(presentation.getPresentationId(), presentation.getTitle());
+                return Uni.createFrom().item(response);
+            })
+            .collect().asList()
+            .onItem().transformToUni(presentations -> Uni.createFrom().item(new PresentationListResponse(presentations.size(), presentations)));
     }
 
     private Uni<GooglePresentation> getImportedPresentationInformation(String presentationId) {
