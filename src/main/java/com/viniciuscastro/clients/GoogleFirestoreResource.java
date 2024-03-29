@@ -29,7 +29,7 @@ public class GoogleFirestoreResource {
     UserInfo userInfo;
 
     private static final String PRESENTATION_COLLECTION = "presentations";
-    private static final String THUMBNAIL_COLLECTION = "thumbnail";
+    private static final String THUMBNAIL_COLLECTION = "thumbnails";
 
     @GET
     @Path("storePresentation")
