@@ -72,10 +72,15 @@ public class GoogleFirestoreResource {
                 .getDocuments()
                 .stream()
                 .findFirst()
-                .map(document -> new GooglePresentationSearchResult(document.getString("presentationId"), true))
-                .orElse(new GooglePresentationSearchResult(presentationId, false));
+                .map(document -> new GooglePresentationSearchResult(
+                    document.getString("presentationId"),
+                    document.getTimestamp("createdAt"),
+                    document.getTimestamp("updatedAt"),
+                    true
+                ))
+                .orElse(new GooglePresentationSearchResult(presentationId));
         } catch (InterruptedException | ExecutionException e) {
-            return new GooglePresentationSearchResult(presentationId, false);
+            return new GooglePresentationSearchResult(presentationId);
         }
     }
 
@@ -90,7 +95,12 @@ public class GoogleFirestoreResource {
                 .get()
                 .getDocuments()
                 .stream()
-                .map(document -> new GooglePresentationSearchResult(document.getString("presentationId"), true))
+                .map(document -> new GooglePresentationSearchResult(
+                    document.getString("presentationId"),
+                    document.getTimestamp("createdAt"),
+                    document.getTimestamp("updatedAt"),
+                    true
+                ))
                 .collect(Collectors.toList())
                 .stream();
         } catch (InterruptedException | ExecutionException e) {

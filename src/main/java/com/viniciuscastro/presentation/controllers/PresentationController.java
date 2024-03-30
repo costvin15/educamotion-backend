@@ -6,7 +6,7 @@ import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;
 import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
 import com.viniciuscastro.presentation.dto.response.PresentationListResponse;
-import com.viniciuscastro.presentation.dto.response.PresentationResponse;
+import com.viniciuscastro.presentation.dto.response.PresentationWithSlidesResponse;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.services.PresentationService;
 
@@ -44,7 +44,7 @@ public class PresentationController {
     @GET
     @Path("{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<PresentationResponse> findPresentationInformation(@PathParam("presentationId") String presentationId) {
+    public Uni<PresentationWithSlidesResponse> findPresentationInformation(@PathParam("presentationId") String presentationId) {
         return service.getPresentationById(presentationId);
     }
 
