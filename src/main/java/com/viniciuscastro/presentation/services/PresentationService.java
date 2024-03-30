@@ -94,6 +94,19 @@ public class PresentationService {
             });
     }
 
+    public Uni<ByteArrayInputStream> getSlideThumbnail(String presentationId, String slideId) {
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(presentation -> this.getSlidesInformationFromPresentationId(presentationId))
+            .onItem().transformToUni(presentation -> {
+                if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
+                    throw new ApplicationException("Apresentação não possui slides.", StatusCode.NO_CONTENT);
+                }
+
+                BucketFile file = new BucketFile(presentationId, slideId);
+                return Uni.createFrom().item(this.googleCloudStorageResource.getFileFromImagesBucket(file));
+            });
+    }
+
     public Uni<ImportResultResponse> importPresentations(String[] presentationIds) {
         return Multi.createFrom().items(presentationIds)
             .onItem().transformToUniAndConcatenate(presentationId -> this.findPresentation(presentationId))

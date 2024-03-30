@@ -56,6 +56,14 @@ public class PresentationController {
     }
 
     @GET
+    @Path("thumbnail/{presentationId}/{slideId}")
+    @Produces("image/png")
+    public Uni<ByteArrayInputStream> findSlideThumbnail(@PathParam("presentationId") String presentationId,
+            @PathParam("slideId") String slideId) {
+        return service.getSlideThumbnail(presentationId, slideId);
+    }
+
+    @GET
     @Path("imported")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<PresentationListResponse> findImportedPresentations() {
