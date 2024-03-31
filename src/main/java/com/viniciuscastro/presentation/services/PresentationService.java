@@ -19,7 +19,8 @@ import com.viniciuscastro.clients.models.GoogleThumbnail;
 import com.viniciuscastro.clients.models.WriteControlBody;
 import com.viniciuscastro.clients.models.requests.CreateSlideBodyRequest;
 import com.viniciuscastro.clients.models.requests.SlideLayoutReference;
-import com.viniciuscastro.clients.models.requests.CreateSlideRequest;
+import com.viniciuscastro.clients.models.requests.UpdateSlidesPositionRequest;
+import com.viniciuscastro.clients.models.requests.BatchUpdateRequest;
 import com.viniciuscastro.clients.models.requests.PresentationUpdateRequest;
 import com.viniciuscastro.clients.models.requests.SlideLayoutReference.PredefinedLayout;
 import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
@@ -229,12 +230,35 @@ public class PresentationService {
             SlideLayoutReference layoutReference = new SlideLayoutReference(PredefinedLayout.TITLE_AND_TWO_COLUMNS, null);
             CreateSlideBodyRequest createSlideRequest = new CreateSlideBodyRequest(null, 0, layoutReference, null);
     
-            CreateSlideRequest request = new CreateSlideRequest(createSlideRequest);
-            CreateSlideRequest[] requests = { request };
+            BatchUpdateRequest request = BatchUpdateRequest.builder()
+                .createSlide(createSlideRequest)
+                .build();
+            BatchUpdateRequest[] requests = { request };
             WriteControlBody writeControl = new WriteControlBody(presentation.getRevisionId());
     
             PresentationUpdateRequest presentationUpdate = new PresentationUpdateRequest(requests, writeControl);
             return this.slidesClient.performBatchUpdate(presentationId, presentationUpdate);
         });
+    }
+
+    public Uni<PresentationUpdateResponse> updateSlidesPosition(String presentationId, String[] slideIds) {
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(presentation -> this.getSlidesInformationFromPresentationId(presentationId))
+            .onItem().transformToUni(presentation -> {
+                if (presentation.getSlides() == null || presentation.getSlides().isEmpty()) {
+                    throw new ApplicationException("Apresentação não possui slides.", StatusCode.NO_CONTENT);
+                }
+
+                BatchUpdateRequest[] requests = new BatchUpdateRequest[slideIds.length];
+                for (int i = 0; i < slideIds.length; i++) {
+                    String[] slideId = { slideIds[i] };
+                    UpdateSlidesPositionRequest updateSlidesPosition = new UpdateSlidesPositionRequest(slideId, i);
+                    requests[i] = BatchUpdateRequest.builder()
+                        .updateSlidesPosition(updateSlidesPosition)
+                        .build();
+                }
+
+                return this.slidesClient.performBatchUpdate(presentationId, new PresentationUpdateRequest(requests, new WriteControlBody(presentation.getRevisionId())));
+            });
     }
 }

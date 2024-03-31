@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 
 import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;
+import com.viniciuscastro.presentation.dto.request.UpdateSlidePositions;
 import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
 import com.viniciuscastro.presentation.dto.response.PresentationListResponse;
 import com.viniciuscastro.presentation.dto.response.PresentationWithSlidesResponse;
@@ -15,6 +16,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -58,8 +60,7 @@ public class PresentationController {
     @GET
     @Path("thumbnail/{presentationId}/{slideId}")
     @Produces("image/png")
-    public Uni<ByteArrayInputStream> findSlideThumbnail(@PathParam("presentationId") String presentationId,
-            @PathParam("slideId") String slideId) {
+    public Uni<ByteArrayInputStream> findSlideThumbnail(@PathParam("presentationId") String presentationId, @PathParam("slideId") String slideId) {
         return service.getSlideThumbnail(presentationId, slideId);
     }
 
@@ -75,5 +76,12 @@ public class PresentationController {
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<PresentationUpdateResponse> createSlide(@PathParam("presentationId") String presentationId) {
         return service.createSlidePage(presentationId);
+    }
+
+    @PUT
+    @Path("update/{presentationId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<PresentationUpdateResponse> updateSlides(@PathParam("presentationId") String presentationId, UpdateSlidePositions request) {
+        return service.updateSlidesPosition(presentationId, request.getSlides());
     }
 }

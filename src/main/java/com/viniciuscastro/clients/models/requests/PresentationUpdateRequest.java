@@ -10,6 +10,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class PresentationUpdateRequest {
-    CreateSlideRequest[] requests;
+    BatchUpdateRequest[] requests;
     WriteControlBody writeControl;
 }
