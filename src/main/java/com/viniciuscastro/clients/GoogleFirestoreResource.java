@@ -16,7 +16,9 @@ import com.viniciuscastro.presentation.models.BucketFile;
 import io.quarkus.oidc.UserInfo;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
@@ -32,9 +34,9 @@ public class GoogleFirestoreResource {
     private static final String THUMBNAIL_COLLECTION = "thumbnails";
 
     @GET
-    @Path("storePresentation")
+    @Path("storePresentation/{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String storePresentation(String presentationId) {
+    public String storePresentation(@PathParam("presentationId") String presentationId) {
         CollectionReference presentations = firestore.collection(PRESENTATION_COLLECTION);
         try {
             presentations.add(new StorePresentationRequest(presentationId, userInfo.getSubject()))
@@ -45,7 +47,7 @@ public class GoogleFirestoreResource {
         return presentationId;
     }
 
-    @GET
+    @POST
     @Path("storeThumbnail")
     @Produces(MediaType.APPLICATION_JSON)
     public BucketFile storeThumbnail(BucketFile file) {
@@ -60,9 +62,9 @@ public class GoogleFirestoreResource {
     }
 
     @GET
-    @Path("searchPresentation")
+    @Path("searchPresentation/{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public GooglePresentationSearchResult searchPresentation(String presentationId) {
+    public GooglePresentationSearchResult searchPresentation(@PathParam("presentationId") String presentationId) {
         CollectionReference presentations = firestore.collection(PRESENTATION_COLLECTION);
         try {
             return presentations.whereEqualTo("presentationId", presentationId)

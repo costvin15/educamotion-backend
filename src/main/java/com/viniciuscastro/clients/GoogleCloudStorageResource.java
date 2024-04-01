@@ -13,7 +13,7 @@ import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
 import com.viniciuscastro.presentation.models.BucketFile;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
@@ -25,7 +25,7 @@ public class GoogleCloudStorageResource {
 
     private static final String BUCKET_NAME = "educamotion-presentation-images";
 
-    @GET
+    @POST
     @Path("storeFile")
     @Produces(MediaType.APPLICATION_JSON)
     public BucketFile storeFileOnImagesBucket(BucketFile file) {
@@ -38,7 +38,7 @@ public class GoogleCloudStorageResource {
         return file;
     }
 
-    @GET
+    @POST
     @Path("getFile")
     @Produces(MediaType.APPLICATION_JSON)
     public ByteArrayInputStream getFileFromImagesBucket(BucketFile file) {
