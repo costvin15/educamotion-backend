@@ -23,7 +23,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/firestore")
-public class GoogleFirestoreResource {
+public class PresentationFirestoreResource {
     @Inject
     Firestore firestore;
 

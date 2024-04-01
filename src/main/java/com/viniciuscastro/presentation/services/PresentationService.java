@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.viniciuscastro.clients.GoogleCloudStorageResource;
 import com.viniciuscastro.clients.GoogleDriveClient;
-import com.viniciuscastro.clients.GoogleFirestoreResource;
+import com.viniciuscastro.clients.PresentationFirestoreResource;
 import com.viniciuscastro.clients.GoogleSlidesClient;
 import com.viniciuscastro.clients.models.GooglePresentation;
 import com.viniciuscastro.clients.models.GooglePresentationSearchResult;
@@ -55,7 +55,7 @@ public class PresentationService {
     GoogleCloudStorageResource googleCloudStorageResource;
 
     @Inject
-    GoogleFirestoreResource googleFirestoreResource;
+    PresentationFirestoreResource presentationFirestoreResource;
 
     Logger logger = LoggerFactory.getLogger(PresentationService.class);
 
@@ -123,7 +123,7 @@ public class PresentationService {
     }
 
     public Uni<PresentationListResponse> searchAllImportedPresentations() {
-        return Multi.createFrom().items(this.googleFirestoreResource.searchAllImportedPresentations())
+        return Multi.createFrom().items(this.presentationFirestoreResource.searchAllImportedPresentations())
             .onItem().transformToUniAndConcatenate(presentation -> this.transformPresentationSearchResultIntoPresentation(presentation))
             .collect().asList()
             .onItem().transformToUni(presentations -> Uni.createFrom().item(new PresentationListResponse(presentations.size(), presentations)));
@@ -189,15 +189,15 @@ public class PresentationService {
     }
 
     private Uni<String> storePresentationOnDatabase(String presentationId) {
-        return Uni.createFrom().item(() -> this.googleFirestoreResource.storePresentation(presentationId));
+        return Uni.createFrom().item(() -> this.presentationFirestoreResource.storePresentation(presentationId));
     }
 
     private Uni<BucketFile> storeThumbnailOnDatabase(BucketFile file) {
-        return Uni.createFrom().item(() -> this.googleFirestoreResource.storeThumbnail(file));
+        return Uni.createFrom().item(() -> this.presentationFirestoreResource.storeThumbnail(file));
     }
 
     private Uni<GooglePresentationSearchResult> searchPresentationOnDatabase(String presentationId) {
-        return Uni.createFrom().item(() -> this.googleFirestoreResource.searchPresentation(presentationId));
+        return Uni.createFrom().item(() -> this.presentationFirestoreResource.searchPresentation(presentationId));
     }
 
     private Multi<Thumbnail> getAllThumbnails(String presentationId) {
