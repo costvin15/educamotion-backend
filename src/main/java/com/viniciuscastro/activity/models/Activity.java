@@ -24,4 +24,13 @@ public class Activity {
         this.createdAt = Timestamp.now();
         this.updatedAt = Timestamp.now();
     }
+
+    public Activity(String id, String presentationId, String activityId, String activityType, Timestamp createdAt, Timestamp updatedAt) {
+        this.id = id;
+        this.presentationId = presentationId;
+        this.activityId = activityId;
+        this.activityType = ActivityType.valueOf(activityType);
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }
