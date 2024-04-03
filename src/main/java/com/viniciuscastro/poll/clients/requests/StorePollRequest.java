@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ChoiceRequest {
-    private String description;
-    private String pollId;
+public class StorePollRequest {
+    private String question;
+    private String presentationId;
 }

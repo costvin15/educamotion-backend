@@ -4,11 +4,10 @@ import java.util.concurrent.ExecutionException;
 
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.Firestore;
-import com.viniciuscastro.clients.PresentationFirestoreResource;
 import com.viniciuscastro.exceptions.ApplicationException;
 import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
-import com.viniciuscastro.poll.clients.requests.ChoiceRequest;
-import com.viniciuscastro.poll.clients.requests.PollRequest;
+import com.viniciuscastro.poll.clients.requests.StoreChoiceRequest;
+import com.viniciuscastro.poll.clients.requests.StorePollRequest;
 import com.viniciuscastro.poll.models.Choice;
 import com.viniciuscastro.poll.models.Poll;
 
@@ -22,8 +21,6 @@ import jakarta.ws.rs.core.MediaType;
 public class PollFirestoreResource {
     @Inject
     Firestore firestore;
-    @Inject
-    PresentationFirestoreResource presentationFirestoreResource;
 
     private static final String POLL_COLLECTION = "polls";
     private static final String CHOICE_COLLECTION = "choices";
@@ -31,7 +28,7 @@ public class PollFirestoreResource {
     @POST
     @Path("storePoll")
     @Produces(MediaType.APPLICATION_JSON)
-    public Poll storePoll(PollRequest request) {
+    public Poll storePoll(StorePollRequest request) {
         Poll poll = new Poll(request.getQuestion(), request.getPresentationId());
         CollectionReference polls = firestore.collection(POLL_COLLECTION);
 
@@ -46,7 +43,7 @@ public class PollFirestoreResource {
     @POST
     @Path("storeChoice")
     @Produces(MediaType.APPLICATION_JSON)
-    public Choice storeChoice(ChoiceRequest request) {
+    public Choice storeChoice(StoreChoiceRequest request) {
         Choice choice = new Choice(request.getDescription(), request.getPollId());
         CollectionReference choices = firestore.collection(CHOICE_COLLECTION);
 
