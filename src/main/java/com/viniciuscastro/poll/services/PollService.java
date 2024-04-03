@@ -3,6 +3,7 @@ package com.viniciuscastro.poll.services;
 import com.viniciuscastro.poll.clients.PollFirestoreResource;
 import com.viniciuscastro.poll.clients.requests.ChoiceRequest;
 import com.viniciuscastro.poll.clients.requests.PollRequest;
+import com.viniciuscastro.poll.dto.responses.PollResponse;
 import com.viniciuscastro.poll.models.Poll;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -13,14 +14,22 @@ public class PollService {
     @Inject
     PollFirestoreResource pollFirestoreResource;
 
-    public Poll storePoll() {
-        PollRequest pollRequest = new PollRequest("Hello from the world?", "1234");
+    public PollResponse storePoll(String presentationId, String question, String[] choices) {
+        PollRequest pollRequest = new PollRequest(question, presentationId);
         Poll poll = pollFirestoreResource.storePoll(pollRequest);
-        ChoiceRequest choiceRequest1 = new ChoiceRequest("Yes", poll.getId());
-        ChoiceRequest choiceRequest2 = new ChoiceRequest("No", poll.getId());
-        pollFirestoreResource.storeChoice(choiceRequest1);
-        pollFirestoreResource.storeChoice(choiceRequest2);
 
-        return poll;
+        for (String choice : choices) {
+            ChoiceRequest choiceRequest = new ChoiceRequest(choice, poll.getId());
+            pollFirestoreResource.storeChoice(choiceRequest);
+        }
+
+        return new PollResponse(
+            poll.getId(),
+            poll.getPresentationId(),
+            poll.getQuestion(),
+            choices,
+            poll.getCreatedAt().toDate(),
+            poll.getUpdatedAt().toDate()
+        );
     }
 }
