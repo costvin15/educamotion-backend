@@ -5,6 +5,7 @@ import com.viniciuscastro.activity.dto.responses.ActivityResponse;
 import com.viniciuscastro.activity.services.ActivityService;
 
 import io.quarkus.security.Authenticated;
+import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -19,8 +20,8 @@ public class ActivityController {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public ActivityResponse storeActivity(ActivityRequest request) {
-        return activityService.storeActivity(
+    public Uni<ActivityResponse> storeActivity(ActivityRequest request) {
+        return activityService.validateAndStoreActivity(
             request.getPresentationId(),
             request.getActivityId(),
             request.getType()

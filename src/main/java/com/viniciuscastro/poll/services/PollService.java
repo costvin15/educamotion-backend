@@ -1,11 +1,16 @@
 package com.viniciuscastro.poll.services;
 
+import com.viniciuscastro.activity.dto.responses.ActivityResponse;
+import com.viniciuscastro.activity.services.ActivityService;
 import com.viniciuscastro.poll.clients.PollFirestoreResource;
 import com.viniciuscastro.poll.clients.requests.StoreChoiceRequest;
 import com.viniciuscastro.poll.clients.requests.StorePollRequest;
 import com.viniciuscastro.poll.dto.responses.PollResponse;
 import com.viniciuscastro.poll.models.Poll;
+import com.viniciuscastro.presentation.dto.response.PresentationWithSlidesResponse;
+import com.viniciuscastro.presentation.services.PresentationService;
 
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 
@@ -14,22 +19,48 @@ public class PollService {
     @Inject
     PollFirestoreResource pollFirestoreResource;
 
-    public PollResponse storePoll(String presentationId, String question, String[] choices) {
-        StorePollRequest pollRequest = new StorePollRequest(question, presentationId);
-        Poll poll = pollFirestoreResource.storePoll(pollRequest);
+    @Inject
+    PresentationService presentationService;
 
-        for (String choice : choices) {
-            StoreChoiceRequest choiceRequest = new StoreChoiceRequest(choice, poll.getId());
-            pollFirestoreResource.storeChoice(choiceRequest);
-        }
+    @Inject
+    ActivityService activityService;
 
-        return new PollResponse(
-            poll.getId(),
-            poll.getPresentationId(),
-            poll.getQuestion(),
-            choices,
-            poll.getCreatedAt().toDate(),
-            poll.getUpdatedAt().toDate()
-        );
+    private static final String POLL_TYPE = "poll";
+
+    public Uni<ActivityResponse> validateAndStorePoll(String presentationId, String question, String[] choices) {
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(presentation -> this.validatePresentation(presentation))
+            .onItem().transformToUni(presentation -> this.storePoll(presentation.getPresentationId(), question, choices))
+            .onItem().transformToUni(poll -> this.storeActivity(presentationId, poll.getId()));
+    }
+
+    private Uni<PollResponse> storePoll(String presentationId, String question, String[] choices) {
+        return Uni.createFrom().item(() -> {
+            StorePollRequest pollRequest = new StorePollRequest(question, presentationId);
+            Poll poll = pollFirestoreResource.storePoll(pollRequest);
+
+            for (String choice : choices) {
+                StoreChoiceRequest choiceRequest = new StoreChoiceRequest(choice, poll.getId());
+                pollFirestoreResource.storeChoice(choiceRequest);
+            }
+
+            return new PollResponse(
+                poll.getId(),
+                poll.getPresentationId(),
+                poll.getQuestion(),
+                choices,
+                poll.getCreatedAt().toDate(),
+                poll.getUpdatedAt().toDate()
+            );
+        });
+    }
+
+    private Uni<ActivityResponse> storeActivity(String presentationId, String activityId) {
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(presentation -> this.activityService.validateAndStoreActivity(presentation, activityId, POLL_TYPE));
+    }
+
+    private Uni<PresentationWithSlidesResponse> validatePresentation(String presentationId) {
+        return presentationService.getPresentationById(presentationId);
     }
 }
