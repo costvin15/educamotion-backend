@@ -17,11 +17,12 @@ public class Activity {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
-    public Activity(String presentationId, String activityId, ActivityType activityType) {
+    public Activity(String presentationId, String activityId, ActivityType activityType, String objectId) {
         this.id = UUID.randomUUID().toString();
         this.presentationId = presentationId;
         this.activityId = activityId;
         this.activityType = activityType;
+        this.objectId = objectId;
         this.createdAt = Timestamp.now();
         this.updatedAt = Timestamp.now();
     }

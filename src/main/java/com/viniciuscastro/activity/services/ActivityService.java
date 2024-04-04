@@ -53,7 +53,7 @@ public class ActivityService {
 
     private Uni<ActivityResponse> storeActivity(String presentationId, String objectId, String activityId, String activityType) {
         return Uni.createFrom().item(() -> {
-                StoreActivityRequest storeActivityRequest = new StoreActivityRequest(presentationId, activityId, ActivityType.valueOf(activityType));
+                StoreActivityRequest storeActivityRequest = new StoreActivityRequest(presentationId, activityId, objectId, ActivityType.valueOf(activityType));
                 Activity activity = activityFirestoreResource.storeActivity(storeActivityRequest);
                 return new ActivityResponse(
                     activity.getId(),

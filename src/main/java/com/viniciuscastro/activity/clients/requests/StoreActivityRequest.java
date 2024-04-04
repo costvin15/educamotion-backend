@@ -10,5 +10,6 @@ import lombok.Getter;
 public class StoreActivityRequest {
     private String presentationId;
     private String activityId;
+    private String objectId;
     private ActivityType activityType;
 }

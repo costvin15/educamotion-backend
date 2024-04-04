@@ -59,7 +59,8 @@ public class ActivityFirestoreResource {
         Activity activity = new Activity(
             request.getPresentationId(),
             request.getActivityId(),
-            request.getActivityType()
+            request.getActivityType(),
+            request.getObjectId()
         );
         try {
             firestore.collection(ACTIVITY_COLLECTION).add(activity).get();
