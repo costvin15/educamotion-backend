@@ -9,8 +9,8 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class PresentationUpdateResponse {
+public class PresentationBatchUpdateResponse {
     private String presentationId;
-    private CreateSlideResponse[] replies;
+    private UpdatePresentationResponse[] replies;
     private WriteControlBody writeControl;
 }

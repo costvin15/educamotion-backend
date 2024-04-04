@@ -2,7 +2,7 @@ package com.viniciuscastro.presentation.controllers;
 
 import java.io.ByteArrayInputStream;
 
-import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
+import com.viniciuscastro.clients.models.responses.PresentationBatchUpdateResponse;
 import com.viniciuscastro.presentation.dto.request.ImportPresentation;
 import com.viniciuscastro.presentation.dto.request.UpdateSlidePositions;
 import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
@@ -74,14 +74,14 @@ public class PresentationController {
     @GET
     @Path("create/{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<PresentationUpdateResponse> createSlide(@PathParam("presentationId") String presentationId) {
+    public Uni<PresentationBatchUpdateResponse> createSlide(@PathParam("presentationId") String presentationId) {
         return service.createSlidePage(presentationId);
     }
 
     @PUT
     @Path("update/{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<PresentationUpdateResponse> updateSlides(@PathParam("presentationId") String presentationId, UpdateSlidePositions request) {
+    public Uni<PresentationBatchUpdateResponse> updateSlides(@PathParam("presentationId") String presentationId, UpdateSlidePositions request) {
         return service.updateSlidesPosition(presentationId, request.getSlides());
     }
 }

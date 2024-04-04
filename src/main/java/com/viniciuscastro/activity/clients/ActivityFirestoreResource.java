@@ -41,6 +41,7 @@ public class ActivityFirestoreResource {
                     document.getString("presentationId"),
                     document.getString("activityId"),
                     document.getString("activityType"),
+                    document.getString("objectId"),
                     document.getTimestamp("createdAt"),
                     document.getTimestamp("updatedAt")
                 ))

@@ -6,6 +6,7 @@ import com.viniciuscastro.activity.dto.responses.ActivityListResponse;
 import com.viniciuscastro.activity.dto.responses.ActivityResponse;
 import com.viniciuscastro.activity.enums.ActivityType;
 import com.viniciuscastro.activity.models.Activity;
+import com.viniciuscastro.clients.models.responses.PresentationBatchUpdateResponse;
 import com.viniciuscastro.exceptions.ApplicationException;
 import com.viniciuscastro.presentation.dto.response.PresentationWithSlidesResponse;
 import com.viniciuscastro.presentation.services.PresentationService;
@@ -30,6 +31,7 @@ public class ActivityService {
                 activity.getPresentationId(),
                 activity.getActivityId(),
                 activity.getActivityType().name(),
+                activity.getObjectId(),
                 activity.getCreatedAt().toDate(),
                 activity.getUpdatedAt().toDate()
             )))
@@ -40,11 +42,16 @@ public class ActivityService {
     public Uni<ActivityResponse> validateAndStoreActivity(String presentationId, String activityId, String activityType) {
         return Uni.createFrom().item(() -> this.validateActivityType(activityType))
             .onItem().transformToUni(type -> this.validatePresentation(presentationId))
-            .onItem().transformToUni(presentation -> this.presentationService.createSlidePage(presentationId))
-            .onItem().transformToUni(presentation -> this.storeActivity(presentation.getPresentationId(), activityId, activityType));
+            .onItem().transformToUni(presentation -> this.createSlidePageWithCustomActivityBackground(presentationId))
+            .onItem().transformToUni(presentation -> this.storeActivity(
+                presentation.getPresentationId(),
+                presentation.getReplies()[0].getCreateSlide().getObjectId(),
+                activityId,
+                activityType
+            ));
     }
 
-    private Uni<ActivityResponse> storeActivity(String presentationId, String activityId, String activityType) {
+    private Uni<ActivityResponse> storeActivity(String presentationId, String objectId, String activityId, String activityType) {
         return Uni.createFrom().item(() -> {
                 StoreActivityRequest storeActivityRequest = new StoreActivityRequest(presentationId, activityId, ActivityType.valueOf(activityType));
                 Activity activity = activityFirestoreResource.storeActivity(storeActivityRequest);
@@ -53,10 +60,27 @@ public class ActivityService {
                     activity.getPresentationId(),
                     activity.getActivityId(),
                     activity.getActivityType().name(),
+                    activity.getObjectId(),
                     activity.getCreatedAt().toDate(),
                     activity.getUpdatedAt().toDate()
                 );
             });
+    }
+
+    private Uni<PresentationBatchUpdateResponse> createSlidePageWithCustomActivityBackground(String presentationId) {
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(this.presentationService::createSlidePage)
+            .onItem().transformToUni(this::changePageBackground);
+    }
+
+    private Uni<PresentationBatchUpdateResponse> changePageBackground(PresentationBatchUpdateResponse updateResponse) {
+        return Uni.createFrom().item(updateResponse)
+            .onItem().transformToUni(presentation -> this.presentationService.changeBackgroundPage(
+                presentation.getPresentationId(),
+                presentation.getReplies()[0].getCreateSlide().getObjectId(),
+                presentation.getWriteControl().getRequiredRevisionId()
+            ))
+            .onItem().transformToUni(response -> Uni.createFrom().item(updateResponse));
     }
 
     private Uni<PresentationWithSlidesResponse> validatePresentation(String presentationId) {

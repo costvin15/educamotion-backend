@@ -14,6 +14,7 @@ public class ActivityResponse {
     private String presentationId;
     private String activityId;
     private String activityType;
+    private String objectId;
     private Date createdAt;
     private Date updatedAt;
 }

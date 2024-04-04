@@ -13,6 +13,7 @@ public class Activity {
     private String presentationId;
     private ActivityType activityType;
     private String activityId;
+    private String objectId;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
@@ -25,11 +26,12 @@ public class Activity {
         this.updatedAt = Timestamp.now();
     }
 
-    public Activity(String id, String presentationId, String activityId, String activityType, Timestamp createdAt, Timestamp updatedAt) {
+    public Activity(String id, String presentationId, String activityId, String activityType, String objectId, Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.presentationId = presentationId;
         this.activityId = activityId;
         this.activityType = ActivityType.valueOf(activityType);
+        this.objectId = objectId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

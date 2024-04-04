@@ -25,8 +25,7 @@ import com.viniciuscastro.clients.models.requests.UpdatePagePropertiesRequest.St
 import com.viniciuscastro.clients.models.requests.BatchUpdateRequest;
 import com.viniciuscastro.clients.models.requests.PresentationUpdateRequest;
 import com.viniciuscastro.clients.models.requests.UpdatePagePropertiesRequest;
-import com.viniciuscastro.clients.models.responses.CreateSlideBodyResponse;
-import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
+import com.viniciuscastro.clients.models.responses.PresentationBatchUpdateResponse;
 import com.viniciuscastro.exceptions.ApplicationException;
 import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
 import com.viniciuscastro.presentation.dto.response.ImportResultResponse;
@@ -227,7 +226,7 @@ public class PresentationService {
      * TODO: Há um caso de uso que não está sendo atendido, que é quando o usuário não tem permissão para
      * editar esse slide (Por exemplo: O slide foi compartilhado com ele apenas para visualização)
      */
-    public Uni<PresentationUpdateResponse> createSlidePage(String presentationId) {
+    public Uni<PresentationBatchUpdateResponse> createSlidePage(String presentationId) {
         return Uni.createFrom().item(presentationId)
             .onItem().transformToUni(presentation -> this.getSlidesInformationFromPresentationId(presentationId))
             .onItem().transformToUni(presentation -> {
@@ -241,20 +240,19 @@ public class PresentationService {
         
                 PresentationUpdateRequest presentationUpdate = new PresentationUpdateRequest(requests, writeControl);
                 return this.slidesClient.performBatchUpdate(presentationId, presentationUpdate);
-            })
-            .onItem().transformToUni(presentation -> {
-                if (presentation.getReplies().length < 0) {
-                    throw new ApplicationException("Erro ao criar slide.", StatusCode.INTERNAL_SERVER_ERROR);
-                }
+            });
+    }
 
+    public Uni<PresentationBatchUpdateResponse> changeBackgroundPage(String presentationId, String objectId, String revisionId) {
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(presentation -> {
                 String backgroundUrl = "https://storage.googleapis.com/educamotion-static-images/slide-background";
 
-                CreateSlideBodyResponse response = presentation.getReplies()[0].getCreateSlide();
                 StretchedPictureFill stretchedPictureFill = new StretchedPictureFill(backgroundUrl);
                 PageBackgroundFill pageBackgroundFill = new PageBackgroundFill(stretchedPictureFill);
                 PageProperties pageProperties = new PageProperties(pageBackgroundFill);
                 UpdatePagePropertiesRequest updatePageProperties = new UpdatePagePropertiesRequest(
-                    response.getObjectId(),
+                    objectId,
                     "pageBackgroundFill.stretchedPictureFill.contentUrl",
                     pageProperties
                 );
@@ -263,13 +261,13 @@ public class PresentationService {
                     .updatePageProperties(updatePageProperties)
                     .build();
                 BatchUpdateRequest[] requests = { request };
-                WriteControlBody writeControl = new WriteControlBody(presentation.getWriteControl().getRequiredRevisionId());
+                WriteControlBody writeControl = new WriteControlBody(revisionId);
                 PresentationUpdateRequest presentationUpdate = new PresentationUpdateRequest(requests, writeControl);
                 return this.slidesClient.performBatchUpdate(presentationId, presentationUpdate);
             });
     }
 
-    public Uni<PresentationUpdateResponse> updateSlidesPosition(String presentationId, String[] slideIds) {
+    public Uni<PresentationBatchUpdateResponse> updateSlidesPosition(String presentationId, String[] slideIds) {
         return Uni.createFrom().item(presentationId)
             .onItem().transformToUni(presentation -> this.getSlidesInformationFromPresentationId(presentationId))
             .onItem().transformToUni(presentation -> {

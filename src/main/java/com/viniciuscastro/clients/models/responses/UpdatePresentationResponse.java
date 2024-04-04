@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class CreateSlideResponse {
+public class UpdatePresentationResponse {
     private CreateSlideBodyResponse createSlide;
 }
