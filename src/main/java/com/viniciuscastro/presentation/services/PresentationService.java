@@ -18,11 +18,14 @@ import com.viniciuscastro.clients.models.GooglePresentationSearchResult;
 import com.viniciuscastro.clients.models.GoogleThumbnail;
 import com.viniciuscastro.clients.models.WriteControlBody;
 import com.viniciuscastro.clients.models.requests.CreateSlideBodyRequest;
-import com.viniciuscastro.clients.models.requests.SlideLayoutReference;
 import com.viniciuscastro.clients.models.requests.UpdateSlidesPositionRequest;
+import com.viniciuscastro.clients.models.requests.UpdatePagePropertiesRequest.PageBackgroundFill;
+import com.viniciuscastro.clients.models.requests.UpdatePagePropertiesRequest.PageProperties;
+import com.viniciuscastro.clients.models.requests.UpdatePagePropertiesRequest.StretchedPictureFill;
 import com.viniciuscastro.clients.models.requests.BatchUpdateRequest;
 import com.viniciuscastro.clients.models.requests.PresentationUpdateRequest;
-import com.viniciuscastro.clients.models.requests.SlideLayoutReference.PredefinedLayout;
+import com.viniciuscastro.clients.models.requests.UpdatePagePropertiesRequest;
+import com.viniciuscastro.clients.models.responses.CreateSlideBodyResponse;
 import com.viniciuscastro.clients.models.responses.PresentationUpdateResponse;
 import com.viniciuscastro.exceptions.ApplicationException;
 import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
@@ -225,20 +228,45 @@ public class PresentationService {
      * editar esse slide (Por exemplo: O slide foi compartilhado com ele apenas para visualização)
      */
     public Uni<PresentationUpdateResponse> createSlidePage(String presentationId) {
-        Uni<GooglePresentation> presentationInformation = this.getSlidesInformationFromPresentationId(presentationId);
-        return presentationInformation.onItem().transformToUni(presentation -> {
-            SlideLayoutReference layoutReference = new SlideLayoutReference(PredefinedLayout.TITLE_AND_TWO_COLUMNS, null);
-            CreateSlideBodyRequest createSlideRequest = new CreateSlideBodyRequest(null, 0, layoutReference, null);
-    
-            BatchUpdateRequest request = BatchUpdateRequest.builder()
-                .createSlide(createSlideRequest)
-                .build();
-            BatchUpdateRequest[] requests = { request };
-            WriteControlBody writeControl = new WriteControlBody(presentation.getRevisionId());
-    
-            PresentationUpdateRequest presentationUpdate = new PresentationUpdateRequest(requests, writeControl);
-            return this.slidesClient.performBatchUpdate(presentationId, presentationUpdate);
-        });
+        return Uni.createFrom().item(presentationId)
+            .onItem().transformToUni(presentation -> this.getSlidesInformationFromPresentationId(presentationId))
+            .onItem().transformToUni(presentation -> {
+                CreateSlideBodyRequest createSlideRequest = new CreateSlideBodyRequest(null, 0, null, null);
+        
+                BatchUpdateRequest request = BatchUpdateRequest.builder()
+                    .createSlide(createSlideRequest)
+                    .build();
+                BatchUpdateRequest[] requests = { request };
+                WriteControlBody writeControl = new WriteControlBody(presentation.getRevisionId());
+        
+                PresentationUpdateRequest presentationUpdate = new PresentationUpdateRequest(requests, writeControl);
+                return this.slidesClient.performBatchUpdate(presentationId, presentationUpdate);
+            })
+            .onItem().transformToUni(presentation -> {
+                if (presentation.getReplies().length < 0) {
+                    throw new ApplicationException("Erro ao criar slide.", StatusCode.INTERNAL_SERVER_ERROR);
+                }
+
+                String backgroundUrl = "https://storage.googleapis.com/educamotion-static-images/slide-background";
+
+                CreateSlideBodyResponse response = presentation.getReplies()[0].getCreateSlide();
+                StretchedPictureFill stretchedPictureFill = new StretchedPictureFill(backgroundUrl);
+                PageBackgroundFill pageBackgroundFill = new PageBackgroundFill(stretchedPictureFill);
+                PageProperties pageProperties = new PageProperties(pageBackgroundFill);
+                UpdatePagePropertiesRequest updatePageProperties = new UpdatePagePropertiesRequest(
+                    response.getObjectId(),
+                    "pageBackgroundFill.stretchedPictureFill.contentUrl",
+                    pageProperties
+                );
+
+                BatchUpdateRequest request = BatchUpdateRequest.builder()
+                    .updatePageProperties(updatePageProperties)
+                    .build();
+                BatchUpdateRequest[] requests = { request };
+                WriteControlBody writeControl = new WriteControlBody(presentation.getWriteControl().getRequiredRevisionId());
+                PresentationUpdateRequest presentationUpdate = new PresentationUpdateRequest(requests, writeControl);
+                return this.slidesClient.performBatchUpdate(presentationId, presentationUpdate);
+            });
     }
 
     public Uni<PresentationUpdateResponse> updateSlidesPosition(String presentationId, String[] slideIds) {

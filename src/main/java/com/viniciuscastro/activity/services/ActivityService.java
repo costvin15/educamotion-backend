@@ -40,6 +40,7 @@ public class ActivityService {
     public Uni<ActivityResponse> validateAndStoreActivity(String presentationId, String activityId, String activityType) {
         return Uni.createFrom().item(() -> this.validateActivityType(activityType))
             .onItem().transformToUni(type -> this.validatePresentation(presentationId))
+            .onItem().transformToUni(presentation -> this.presentationService.createSlidePage(presentationId))
             .onItem().transformToUni(presentation -> this.storeActivity(presentation.getPresentationId(), activityId, activityType));
     }
 

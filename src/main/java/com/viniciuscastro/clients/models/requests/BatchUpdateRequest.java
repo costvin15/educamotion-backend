@@ -8,4 +8,5 @@ import lombok.Getter;
 public class BatchUpdateRequest {
     private CreateSlideBodyRequest createSlide;
     private UpdateSlidesPositionRequest updateSlidesPosition;
+    private UpdatePagePropertiesRequest updatePageProperties;
 }
