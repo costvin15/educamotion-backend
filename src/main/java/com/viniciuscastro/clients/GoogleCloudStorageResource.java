@@ -1,6 +1,7 @@
 package com.viniciuscastro.clients;
 
 import java.io.ByteArrayInputStream;
+import java.util.Optional;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -41,12 +42,15 @@ public class GoogleCloudStorageResource {
     @POST
     @Path("getFile")
     @Produces(MediaType.APPLICATION_JSON)
-    public ByteArrayInputStream getFileFromImagesBucket(BucketFile file) {
+    public Optional<ByteArrayInputStream> getFileFromImagesBucket(BucketFile file) {
         try {
             BlobId blobId = BlobId.of(BUCKET_NAME, file.getFilename());
             Blob blob = this.storage.get(blobId);
+            if (blob == null) {
+                return Optional.empty();
+            }
             byte[] bytes = blob.getContent(BlobSourceOption.generationMatch());
-            return new ByteArrayInputStream(bytes);
+            return Optional.of(new ByteArrayInputStream(bytes));
         } catch (StorageException exception) {
             throw new ApplicationException("Ocorreu um erro ao buscar imagem.", StatusCode.INTERNAL_SERVER_ERROR);
         }

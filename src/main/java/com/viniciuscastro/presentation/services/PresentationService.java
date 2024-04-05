@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
@@ -83,7 +84,7 @@ public class PresentationService {
             });
     }
 
-    public Uni<ByteArrayInputStream> getThumbnail(String presentationId) {
+    public Uni<Optional<ByteArrayInputStream>> getThumbnail(String presentationId) {
         return Uni.createFrom().item(presentationId)
             .onItem().transformToUni(presentation -> this.getSlidesInformationFromPresentationId(presentationId))
             .onItem().transformToUni(presentation -> {
@@ -97,7 +98,7 @@ public class PresentationService {
             });
     }
 
-    public Uni<ByteArrayInputStream> getSlideThumbnail(String presentationId, String slideId) {
+    public Uni<Optional<ByteArrayInputStream>> getSlideThumbnail(String presentationId, String slideId) {
         return Uni.createFrom().item(presentationId)
             .onItem().transformToUni(presentation -> this.getSlidesInformationFromPresentationId(presentationId))
             .onItem().transformToUni(presentation -> {

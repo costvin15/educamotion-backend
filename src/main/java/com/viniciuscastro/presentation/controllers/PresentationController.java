@@ -54,14 +54,26 @@ public class PresentationController {
     @Path("thumbnail/{presentationId}")
     @Produces("image/png")
     public Uni<ByteArrayInputStream> findThumbnail(@PathParam("presentationId") String presentationId) {
-        return service.getThumbnail(presentationId);
+        return service.getThumbnail(presentationId)
+            .onItem().transformToUni(thumbnail -> {
+                if (thumbnail.isPresent()) {
+                    return Uni.createFrom().item(thumbnail.get());
+                }
+                return Uni.createFrom().nullItem();
+            });
     }
 
     @GET
     @Path("thumbnail/{presentationId}/{slideId}")
     @Produces("image/png")
     public Uni<ByteArrayInputStream> findSlideThumbnail(@PathParam("presentationId") String presentationId, @PathParam("slideId") String slideId) {
-        return service.getSlideThumbnail(presentationId, slideId);
+        return service.getSlideThumbnail(presentationId, slideId)
+            .onItem().transformToUni(thumbnail -> {
+                if (thumbnail.isPresent()) {
+                    return Uni.createFrom().item(thumbnail.get());
+                }
+                return Uni.createFrom().nullItem();
+            });
     }
 
     @GET
