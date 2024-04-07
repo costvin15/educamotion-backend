@@ -10,8 +10,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PollResponse {
     private String id;
-    private String question;
     private String presentationId;
+    private String question;
     private List<ChoiceResponse> choices;
     private Date createdAt;
     private Date updatedAt;

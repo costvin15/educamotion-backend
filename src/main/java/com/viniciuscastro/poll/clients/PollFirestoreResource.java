@@ -57,8 +57,8 @@ public class PollFirestoreResource {
                 .stream()
                 .map(document -> new Choice(
                     document.getString("id"),
-                    document.getString("description"),
                     document.getString("pollId"),
+                    document.getString("description"),
                     document.getTimestamp("createdAt"),
                     document.getTimestamp("updatedAt")
                 ))

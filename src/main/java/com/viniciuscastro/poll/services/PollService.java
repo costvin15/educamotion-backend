@@ -47,8 +47,8 @@ public class PollService {
 
                 PollResponse pollResponse = new PollResponse(
                     poll.getId(),
-                    poll.getQuestion(),
                     poll.getPresentationId(),
+                    poll.getQuestion(),
                     choices,
                     poll.getCreatedAt().toDate(),
                     poll.getUpdatedAt().toDate()
