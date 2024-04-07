@@ -4,13 +4,15 @@ import java.util.UUID;
 
 import com.google.cloud.Timestamp;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class Choice {
     private String id;
-    private String description;
     private String pollId;
+    private String description;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 

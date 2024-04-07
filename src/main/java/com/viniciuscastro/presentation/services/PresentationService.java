@@ -129,7 +129,9 @@ public class PresentationService {
         return Multi.createFrom().items(this.presentationFirestoreResource.searchAllImportedPresentations())
             .onItem().transformToUniAndConcatenate(presentation -> this.transformPresentationSearchResultIntoPresentation(presentation))
             .collect().asList()
-            .onItem().transformToUni(presentations -> Uni.createFrom().item(new PresentationListResponse(presentations.size(), presentations)));
+            .onItem().transformToUni(presentations ->
+                Uni.createFrom().item(new PresentationListResponse(presentations.size(), presentations)
+            ));
     }
 
     private Uni<PresentationResponse> transformPresentationSearchResultIntoPresentation(GooglePresentationSearchResult presentationSearchResult) {

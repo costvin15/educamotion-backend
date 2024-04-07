@@ -1,18 +1,16 @@
 package com.viniciuscastro.poll.dto.responses;
 
 import java.util.Date;
-import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PollResponse {
+public class ChoiceResponse {
     private String id;
-    private String question;
-    private String presentationId;
-    private List<ChoiceResponse> choices;
+    private String pollId;
+    private String description;
     private Date createdAt;
     private Date updatedAt;
 }

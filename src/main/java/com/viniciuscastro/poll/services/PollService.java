@@ -1,11 +1,16 @@
 package com.viniciuscastro.poll.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.viniciuscastro.activity.dto.responses.ActivityResponse;
 import com.viniciuscastro.activity.services.ActivityService;
 import com.viniciuscastro.poll.clients.PollFirestoreResource;
 import com.viniciuscastro.poll.clients.requests.StoreChoiceRequest;
 import com.viniciuscastro.poll.clients.requests.StorePollRequest;
+import com.viniciuscastro.poll.dto.responses.ChoiceResponse;
 import com.viniciuscastro.poll.dto.responses.PollResponse;
+import com.viniciuscastro.poll.dto.responses.StorePollResponse;
 import com.viniciuscastro.poll.models.Poll;
 import com.viniciuscastro.presentation.dto.response.PresentationWithSlidesResponse;
 import com.viniciuscastro.presentation.services.PresentationService;
@@ -27,6 +32,32 @@ public class PollService {
 
     private static final String POLL_TYPE = "poll";
 
+    public Uni<PollResponse> findPollByActivityId(String activityId) {
+        return Uni.createFrom().item(this.pollFirestoreResource.findPollByActivityId(activityId))
+            .onItem().transformToUni(poll -> {
+                List<ChoiceResponse> choices = poll.getChoices().stream().map(choice -> {
+                    return new ChoiceResponse(
+                        choice.getId(),
+                        choice.getPollId(),
+                        choice.getDescription(),
+                        choice.getCreatedAt().toDate(),
+                        choice.getUpdatedAt().toDate()
+                    );
+                }).collect(Collectors.toList());
+
+                PollResponse pollResponse = new PollResponse(
+                    poll.getId(),
+                    poll.getQuestion(),
+                    poll.getPresentationId(),
+                    choices,
+                    poll.getCreatedAt().toDate(),
+                    poll.getUpdatedAt().toDate()
+                );
+
+                return Uni.createFrom().item(pollResponse);
+            });
+    }
+
     public Uni<ActivityResponse> validateAndStorePoll(String presentationId, String question, String[] choices) {
         return Uni.createFrom().item(presentationId)
             .onItem().transformToUni(presentation -> this.validatePresentation(presentation))
@@ -34,7 +65,7 @@ public class PollService {
             .onItem().transformToUni(poll -> this.storeActivity(presentationId, poll.getId()));
     }
 
-    private Uni<PollResponse> storePoll(String presentationId, String question, String[] choices) {
+    private Uni<StorePollResponse> storePoll(String presentationId, String question, String[] choices) {
         return Uni.createFrom().item(() -> {
             StorePollRequest pollRequest = new StorePollRequest(question, presentationId);
             Poll poll = pollFirestoreResource.storePoll(pollRequest);
@@ -44,7 +75,7 @@ public class PollService {
                 pollFirestoreResource.storeChoice(choiceRequest);
             }
 
-            return new PollResponse(
+            return new StorePollResponse(
                 poll.getId(),
                 poll.getPresentationId(),
                 poll.getQuestion(),
