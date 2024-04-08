@@ -20,6 +20,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
@@ -32,9 +33,9 @@ public class PollFirestoreResource {
     private static final String CHOICE_COLLECTION = "choices";
 
     @GET
-    @Path("findPollByActivityId")
+    @Path("findPollByActivityId/{activityId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public PollAndChoices findPollByActivityId(String activityId) {
+    public PollAndChoices findPollByActivityId(@PathParam("activityId") String activityId) {
         CollectionReference pollsCollection = firestore.collection(POLL_COLLECTION);
         CollectionReference choicesCollection= firestore.collection(CHOICE_COLLECTION);
 
