@@ -1,12 +1,14 @@
 package com.viniciuscastro.session.controllers;
 
 import com.viniciuscastro.session.dto.requests.CreateSessionRequest;
+import com.viniciuscastro.session.dto.requests.FinishSessionRequest;
 import com.viniciuscastro.session.dto.responses.SessionResponse;
 import com.viniciuscastro.session.services.SessionService;
 
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -23,5 +25,12 @@ public class SessionController {
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<SessionResponse> createSession(CreateSessionRequest request) {
         return service.createSession(request);
+    }
+
+    @DELETE
+    @Path("finish")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<SessionResponse> finishSession(FinishSessionRequest request) {
+        return service.finishSession(request);
     }
 }

@@ -6,10 +6,13 @@ import com.google.cloud.Timestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @AllArgsConstructor
 public class Session {
+    private String id;
     private String code;
     private String presentationId;
     private Boolean active = true;

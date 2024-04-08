@@ -3,12 +3,18 @@ package com.viniciuscastro.session.clients;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
+import com.viniciuscastro.exceptions.ApplicationException;
+import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
 import com.viniciuscastro.session.dto.requests.CreateSessionRequest;
+import com.viniciuscastro.session.dto.requests.FinishSessionRequest;
 import com.viniciuscastro.session.models.Session;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -32,11 +38,34 @@ public class SessionFirestoreResource {
 
         CollectionReference sessionsCollection = firestore.collection(SESSION_COLLECTION);
         Session session = new Session(request.getPresentationId());
-        sessionsCollection.add(session);
+
+        ApiFuture<DocumentReference> transaction = sessionsCollection.add(session);
+        try {
+            session.setId(transaction.get().getId());
+            sessionsCollection.document(session.getId()).set(session);
+        } catch (InterruptedException | ExecutionException exception) {
+        }
+
         return session;
     }
 
-    public Optional<Session> findActiveSessionByPresentationId(String presentationId) {
+    @DELETE
+    @Path("finishSession")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Session finishSession(FinishSessionRequest request) {
+        Optional<Session> activeSession = findActiveSessionByPresentationId(request.getPresentationId());
+        if (activeSession.isEmpty()) {
+            throw new ApplicationException("Sessão não encontrada.", StatusCode.NOT_FOUND);
+        }
+
+        CollectionReference sessionsCollection = firestore.collection(SESSION_COLLECTION);
+        Session session = activeSession.get();
+        session.setActive(false);
+        sessionsCollection.document(session.getId()).set(session);
+        return session;
+    }
+
+    private Optional<Session> findActiveSessionByPresentationId(String presentationId) {
         CollectionReference sessionsCollection = firestore.collection(SESSION_COLLECTION);
 
         try {
@@ -48,6 +77,7 @@ public class SessionFirestoreResource {
                 .stream()
                 .findFirst()
                 .map(document -> Optional.of(new Session(
+                    document.getId(),
                     document.getString("code"),
                     document.getString("presentationId"),
                     document.getBoolean("active"),
