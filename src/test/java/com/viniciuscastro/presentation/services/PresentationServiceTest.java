@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.google.cloud.Timestamp;
+import com.viniciuscastro.clients.GoogleDriveClient;
 import com.viniciuscastro.clients.GoogleSlidesClient;
 import com.viniciuscastro.clients.PresentationFirestoreResource;
 import com.viniciuscastro.clients.models.GooglePresentation;
@@ -22,6 +23,9 @@ import com.viniciuscastro.clients.models.requests.PresentationUpdateRequest;
 import com.viniciuscastro.clients.models.responses.PresentationBatchUpdateResponse;
 import com.viniciuscastro.exceptions.ApplicationException;
 import com.viniciuscastro.presentation.dto.response.PresentationWithSlidesResponse;
+import com.viniciuscastro.presentation.models.Drive;
+import com.viniciuscastro.presentation.models.DriveFile;
+import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.models.PresentationPage;
 
 import io.quarkus.test.junit.QuarkusMock;
@@ -36,7 +40,7 @@ class PresentationServiceTest {
     PresentationService slidesService;
 
     @BeforeAll
-    public static void setup() {
+    public static void setupPresentations() {
         PresentationFirestoreResource firestoreResourceMock = Mockito.mock(PresentationFirestoreResource.class);
         Mockito.when(firestoreResourceMock.searchPresentation(eq("presentation-id-1")))
             .thenReturn(
@@ -101,6 +105,24 @@ class PresentationServiceTest {
         QuarkusMock.installMockForType(googleSlidesClientMock, GoogleSlidesClient.class, RestClient.LITERAL);
     }
 
+    @BeforeAll
+    public static void setupDrive() {
+        GoogleDriveClient googleDriveClientMock = new GoogleDriveClient() {
+            @Override
+            public Uni<DrivePage> findFiles(Drive drive) {
+                DriveFile file = DriveFile.builder()
+                    .id("file-id-1")
+                    .name("file-name-1")
+                    .build();
+
+                return Uni.createFrom().item(DrivePage.builder()
+                    .files(List.of(file))
+                    .build());
+            }
+        };
+        QuarkusMock.installMockForType(googleDriveClientMock, GoogleDriveClient.class, RestClient.LITERAL);
+    }
+
     @Test
     void teste_buscar_apresentacao_por_id_deve_retornar_dados_esperados() {
         Uni<PresentationWithSlidesResponse> presentation = slidesService.getPresentationById("presentation-id-1");
@@ -130,5 +152,16 @@ class PresentationServiceTest {
         UniAssertSubscriber<PresentationWithSlidesResponse> subscriber = presentation
             .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertFailedWith(ApplicationException.class, "Apresentação não possui slides.");
+    }
+
+    @Test
+    void teste_buscar_apresentacoes_disponiveis_para_importacao_deve_retornar_apresentacoes_esperadas() {
+        Uni<DrivePage> drivePage = slidesService.findPresentationsAvailableForImport("drive-id-1");
+        UniAssertSubscriber<DrivePage> subscriber = drivePage
+            .invoke(receivedDrivePage -> assertEquals(1, receivedDrivePage.getFiles().size()))
+            .invoke(receivedDrivePage -> assertEquals("file-id-1", receivedDrivePage.getFiles().get(0).getId()))
+            .invoke(receivedDrivePage -> assertEquals("file-name-1", receivedDrivePage.getFiles().get(0).getName()))
+            .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompleted();
     }
 }
