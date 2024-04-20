@@ -83,13 +83,8 @@ public class PollFirestoreResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Poll storePoll(StorePollRequest request) {
         CollectionReference polls = firestore.collection(POLL_COLLECTION);
-        Poll poll = new Poll(request.getQuestion(), request.getPresentationId());
-
-        try {
-            polls.add(poll).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new ApplicationException("Erro ao inserir enquete.", StatusCode.INTERNAL_SERVER_ERROR);
-        }
+        Poll poll = new Poll(request.getPresentationId(), request.getQuestion());
+        polls.add(poll);
         return poll;
     }
 
@@ -99,12 +94,7 @@ public class PollFirestoreResource {
     public Choice storeChoice(StoreChoiceRequest request) {
         CollectionReference choices = firestore.collection(CHOICE_COLLECTION);
         Choice choice = new Choice(request.getDescription(), request.getPollId());
-
-        try {
-            choices.add(choice).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new ApplicationException("Erro ao inserir opção de enquete.", StatusCode.INTERNAL_SERVER_ERROR);
-        }
+        choices.add(choice);
         return choice;
     }
 }

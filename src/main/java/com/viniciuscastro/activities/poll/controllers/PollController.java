@@ -16,7 +16,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 @Authenticated
-@Path("poll")
+@Path("activity/poll")
 public class PollController {
     @Inject
     PollService pollService;

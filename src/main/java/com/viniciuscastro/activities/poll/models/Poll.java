@@ -1,24 +1,16 @@
 package com.viniciuscastro.activities.poll.models;
 
-import java.util.UUID;
-
-import com.google.cloud.Timestamp;
+import com.viniciuscastro.activities.models.BaseActivity;
 
 import lombok.Getter;
 
 @Getter
-public class Poll {
-    private String id;
+public class Poll extends BaseActivity {
     private String question;
-    private String presentationId;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
 
-    public Poll(String question, String presentationId) {
-        this.id = UUID.randomUUID().toString();
+    public Poll(String presentationId, String question) {
+        super(presentationId);
+
         this.question = question;
-        this.presentationId = presentationId;
-        this.createdAt = Timestamp.now();
-        this.updatedAt = Timestamp.now();
     }
 }
