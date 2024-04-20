@@ -1,11 +1,16 @@
 package com.viniciuscastro.presentation.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 
+import java.io.ByteArrayInputStream;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.google.cloud.Timestamp;
+import com.viniciuscastro.clients.GoogleCloudStorageResource;
 import com.viniciuscastro.clients.GoogleDriveClient;
 import com.viniciuscastro.clients.GoogleSlidesClient;
 import com.viniciuscastro.clients.PresentationFirestoreResource;
@@ -22,7 +28,9 @@ import com.viniciuscastro.clients.models.GoogleThumbnail;
 import com.viniciuscastro.clients.models.requests.PresentationUpdateRequest;
 import com.viniciuscastro.clients.models.responses.PresentationBatchUpdateResponse;
 import com.viniciuscastro.exceptions.ApplicationException;
+import com.viniciuscastro.matchers.BucketFileMatcher;
 import com.viniciuscastro.presentation.dto.response.PresentationWithSlidesResponse;
+import com.viniciuscastro.presentation.models.BucketFile;
 import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DriveFile;
 import com.viniciuscastro.presentation.models.DrivePage;
@@ -123,6 +131,16 @@ class PresentationServiceTest {
         QuarkusMock.installMockForType(googleDriveClientMock, GoogleDriveClient.class, RestClient.LITERAL);
     }
 
+    @BeforeAll
+    public static void setupCloudStorage() {
+        GoogleCloudStorageResource cloudStorageResource = Mockito.mock(GoogleCloudStorageResource.class);
+        BucketFile file = new BucketFile("presentation-id-1", "expected-object-id");
+
+        Mockito.when(cloudStorageResource.getFileFromImagesBucket(argThat(new BucketFileMatcher(file))))
+            .thenReturn(Optional.of(new ByteArrayInputStream("expected-content".getBytes())));
+        QuarkusMock.installMockForType(cloudStorageResource, GoogleCloudStorageResource.class);
+    }
+
     @Test
     void teste_buscar_apresentacao_por_id_deve_retornar_dados_esperados() {
         Uni<PresentationWithSlidesResponse> presentation = slidesService.getPresentationById("presentation-id-1");
@@ -146,7 +164,7 @@ class PresentationServiceTest {
     }
 
     @Test
-    void teste_buscar_apresentacao_por_id_com_slides_vazios_deve_retornar_erro_esperado() {
+    void teste_buscar_apresentacao_por_id_sem_slides_deve_retornar_erro_esperado() {
         Uni<PresentationWithSlidesResponse> presentation = slidesService.getPresentationById("presentation-id-3");
 
         UniAssertSubscriber<PresentationWithSlidesResponse> subscriber = presentation
@@ -157,11 +175,42 @@ class PresentationServiceTest {
     @Test
     void teste_buscar_apresentacoes_disponiveis_para_importacao_deve_retornar_apresentacoes_esperadas() {
         Uni<DrivePage> drivePage = slidesService.findPresentationsAvailableForImport("drive-id-1");
+
         UniAssertSubscriber<DrivePage> subscriber = drivePage
             .invoke(receivedDrivePage -> assertEquals(1, receivedDrivePage.getFiles().size()))
             .invoke(receivedDrivePage -> assertEquals("file-id-1", receivedDrivePage.getFiles().get(0).getId()))
             .invoke(receivedDrivePage -> assertEquals("file-name-1", receivedDrivePage.getFiles().get(0).getName()))
             .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertCompleted();
+    }
+
+    @Test
+    void teste_buscar_thumbnail_deve_retornar_thumbnail_esperada() {
+        Uni<Optional<ByteArrayInputStream>> thumbnail = slidesService.getThumbnail("presentation-id-1");
+
+        UniAssertSubscriber<Optional<ByteArrayInputStream>> subscriber = thumbnail
+            .invoke(receivedThumbnail -> assertTrue(receivedThumbnail.isPresent()))
+            .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompleted();
+    }
+
+    @Test
+    void teste_buscar_thumbnail_de_apresentacao_com_slides_nulos_deve_lancar_erro_esperado() {
+        Uni<Optional<ByteArrayInputStream>> thumbnail = slidesService.getThumbnail("presentation-id-2");
+
+        UniAssertSubscriber<Optional<ByteArrayInputStream>> subscriber = thumbnail
+            .invoke(receivedThumbnail -> assertFalse(receivedThumbnail.isPresent()))
+            .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertFailedWith(ApplicationException.class, "Apresentação não possui slides.");
+    }
+
+    @Test
+    void teste_buscar_thumbnail_de_apresentacao_sem_slides_deve_lancar_erro_esperado() {
+        Uni<Optional<ByteArrayInputStream>> thumbnail = slidesService.getThumbnail("presentation-id-3");
+
+        UniAssertSubscriber<Optional<ByteArrayInputStream>> subscriber = thumbnail
+            .invoke(receivedThumbnail -> assertFalse(receivedThumbnail.isPresent()))
+            .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertFailedWith(ApplicationException.class, "Apresentação não possui slides.");
     }
 }
