@@ -1,152 +1,134 @@
-// package com.viniciuscastro.presentation.services;
+package com.viniciuscastro.presentation.services;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 
-// import java.util.List;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
-// import org.eclipse.microprofile.rest.client.inject.RestClient;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.params.ParameterizedTest;
-// import org.junit.jupiter.params.provider.CsvSource;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-// import com.viniciuscastro.clients.GoogleDriveClient;
-// import com.viniciuscastro.clients.GoogleSlidesClient;
-// import com.viniciuscastro.clients.models.Presentation;
-// import com.viniciuscastro.clients.models.PresentationThumbnail;
-// import com.viniciuscastro.presentation.models.Drive;
-// import com.viniciuscastro.presentation.models.DriveFile;
-// import com.viniciuscastro.presentation.models.DrivePage;
-// import com.viniciuscastro.presentation.models.PresentationPage;
+import com.google.cloud.Timestamp;
+import com.viniciuscastro.clients.GoogleSlidesClient;
+import com.viniciuscastro.clients.PresentationFirestoreResource;
+import com.viniciuscastro.clients.models.GooglePresentation;
+import com.viniciuscastro.clients.models.GooglePresentationSearchResult;
+import com.viniciuscastro.clients.models.GoogleThumbnail;
+import com.viniciuscastro.clients.models.requests.PresentationUpdateRequest;
+import com.viniciuscastro.clients.models.responses.PresentationBatchUpdateResponse;
+import com.viniciuscastro.exceptions.ApplicationException;
+import com.viniciuscastro.presentation.dto.response.PresentationWithSlidesResponse;
+import com.viniciuscastro.presentation.models.PresentationPage;
 
-// import io.quarkus.test.junit.QuarkusMock;
-// import io.quarkus.test.junit.QuarkusTest;
-// import io.smallrye.mutiny.Uni;
-// import jakarta.inject.Inject;
+import io.quarkus.test.junit.QuarkusMock;
+import io.quarkus.test.junit.QuarkusTest;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import jakarta.inject.Inject;
 
-// @QuarkusTest
-// class PresentationServiceTest {
-//     @Inject
-//     PresentationService slidesService;
+@QuarkusTest
+class PresentationServiceTest {
+    @Inject
+    PresentationService slidesService;
 
-//     @BeforeEach
-//     void setUp() {
-//         GoogleSlidesClient slidesClientMock = new GoogleSlidesClient() {
-//             @Override
-//             public Uni<PresentationThumbnail> getPresentationThumbnail(String presentationId, String pageObjectId) {
-//                 return Uni.createFrom().item(
-//                     PresentationThumbnail
-//                         .builder()
-//                         .contentUrl("https://expectedContentUrl")
-//                         .width(1234)
-//                         .height(4321)
-//                         .build()
-//                 );
-//             }
+    @BeforeAll
+    public static void setup() {
+        PresentationFirestoreResource firestoreResourceMock = Mockito.mock(PresentationFirestoreResource.class);
+        Mockito.when(firestoreResourceMock.searchPresentation(eq("presentation-id-1")))
+            .thenReturn(
+                GooglePresentationSearchResult.builder()
+                    .presentationId("presentation-id-1")
+                    .createdAt(Timestamp.of(new Date(1704081661)))
+                    .updatedAt(Timestamp.of(new Date(1704081661)))
+                    .exists(true)
+                    .build()
+            );
+        Mockito.when(firestoreResourceMock.searchPresentation(eq("presentation-id-2")))
+            .thenReturn(
+                GooglePresentationSearchResult.builder()
+                    .presentationId("presentation-id-2")
+                    .createdAt(Timestamp.of(new Date(1704081661)))
+                    .updatedAt(Timestamp.of(new Date(1704081661)))
+                    .exists(true)
+                    .build()
+            );
+        Mockito.when(firestoreResourceMock.searchPresentation(eq("presentation-id-3")))
+            .thenReturn(
+                GooglePresentationSearchResult.builder()
+                    .presentationId("presentation-id-3")
+                    .createdAt(Timestamp.of(new Date(1704081661)))
+                    .updatedAt(Timestamp.of(new Date(1704081661)))
+                    .exists(true)
+                    .build()
+            );
+        QuarkusMock.installMockForType(firestoreResourceMock, PresentationFirestoreResource.class);
 
-//             @Override
-//             public Uni<Presentation> getPresentation(String presentationId) {
-//                 Presentation expectedSlide;
+        GoogleSlidesClient googleSlidesClientMock = new GoogleSlidesClient() {
+            @Override
+            public Uni<GooglePresentation> getPresentation(String presentationId) {
+                List<PresentationPage> slides = new ArrayList<>();
+                if (presentationId == "presentation-id-1") {
+                    slides.add(PresentationPage.builder()
+                        .objectId("expected-object-id")
+                        .build());
+                }
+                if (presentationId == "presentation-id-2") {
+                    slides = null;
+                }
 
-//                 switch (presentationId) {
-//                     case "expectedPresentationId-1":
-//                         expectedSlide = Presentation
-//                             .builder()
-//                             .presentationId("expectedPresentationId-1")
-//                             .title("Expected Presentation 1")
-//                             .slides(List.of(
-//                                 PresentationPage.builder()
-//                                     .objectId("p")
-//                                     .build()
-//                             ))
-//                             .build();
-//                         break;
-//                     case "expectedPresentationId-2":
-//                         expectedSlide = Presentation
-//                             .builder()
-//                             .presentationId("expectedPresentationId-2")
-//                             .title("Expected Presentation 2")
-//                             .slides(List.of(
-//                                 PresentationPage.builder()
-//                                     .objectId("b")
-//                                     .build()
-//                             ))
-//                             .build();
-//                         break;
-//                     default:
-//                         throw new IllegalArgumentException("Unexpected presentationId: " + presentationId);
-//                 }
+                return Uni.createFrom().item(GooglePresentation.builder()
+                    .presentationId(presentationId)
+                    .title("expected-title")
+                    .revisionId("expected-revision-id")
+                    .slides(slides)
+                    .build());
+            }
 
-//                 return Uni.createFrom().item(expectedSlide);
-//             }
+            @Override
+            public Uni<GoogleThumbnail> getPresentationThumbnail(String presentationId, String pageObjectId) {
+                return null;
+            }
 
-//             @Override
-//             public Uni<String> performBatchUpdate() {
-//                 return null;
-//             }
-//         };
+            @Override
+            public Uni<PresentationBatchUpdateResponse> performBatchUpdate(String presentationId, PresentationUpdateRequest presentationUpdate) {
+                return null;
+            }
+        };
+        QuarkusMock.installMockForType(googleSlidesClientMock, GoogleSlidesClient.class, RestClient.LITERAL);
+    }
 
-//         GoogleDriveClient driveClientMock = new GoogleDriveClient() {
-//             @Override
-//             public Uni<DrivePage> findFiles(Drive drive) {
-//                 DriveFile file1 = DriveFile
-//                     .builder()
-//                     .id("expectedPresentationId-1")
-//                     .name("Expected Presentation 1")
-//                     .build();
-//                 DriveFile file2 = DriveFile
-//                     .builder()
-//                     .id("expectedPresentationId-2")
-//                     .name("Expected Presentation 2")
-//                     .build();
+    @Test
+    void teste_buscar_apresentacao_por_id_deve_retornar_dados_esperados() {
+        Uni<PresentationWithSlidesResponse> presentation = slidesService.getPresentationById("presentation-id-1");
 
-//                 DrivePage drivePage;
+        UniAssertSubscriber<PresentationWithSlidesResponse> subscriber = presentation
+            .invoke(receivedPresentation -> assertEquals("presentation-id-1", receivedPresentation.getPresentationId()))
+            .invoke(receivedPresentation -> assertEquals("expected-title", receivedPresentation.getTitle()))
+            .invoke(receivedPresentation -> assertEquals(1, receivedPresentation.getTotalSlides()))
+            .invoke(receivedPresentation -> assertEquals("expected-object-id", receivedPresentation.getSlides().get(0).getObjectId()))
+            .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompleted();
+    }
 
-//                 if (drive.getPageToken() == null) {
-//                     drivePage = DrivePage.builder()
-//                         .nextPageToken("1")
-//                         .files(List.of(file1))
-//                         .build();
-//                 } else {
-//                     drivePage = DrivePage.builder()
-//                         .files(List.of(file2))
-//                         .build();
-//                 }
+    @Test
+    void teste_buscar_apresentacao_por_id_com_slides_nulos_deve_retornar_erro_esperado() {
+        Uni<PresentationWithSlidesResponse> presentation = slidesService.getPresentationById("presentation-id-2");
 
-//                 return Uni.createFrom().item(drivePage);
-//             }
-//         };
+        UniAssertSubscriber<PresentationWithSlidesResponse> subscriber = presentation
+            .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertFailedWith(ApplicationException.class, "Apresentação não possui slides.");
+    }
 
-//         QuarkusMock.installMockForType(slidesClientMock, GoogleSlidesClient.class, RestClient.LITERAL);
-//         QuarkusMock.installMockForType(driveClientMock, GoogleDriveClient.class, RestClient.LITERAL);
-//     }
+    @Test
+    void teste_buscar_apresentacao_por_id_com_slides_vazios_deve_retornar_erro_esperado() {
+        Uni<PresentationWithSlidesResponse> presentation = slidesService.getPresentationById("presentation-id-3");
 
-//     @Test
-//     void test_get_thumbnail_should_return_expected_thumbnail() {
-//         String presentationId = "expectedPresentationId-1";
-
-//         Uni<PresentationThumbnail> result = this.slidesService.getThumbnail(presentationId);
-//         PresentationThumbnail receivedThumbnail = result.await().indefinitely();
-
-//         assertNotNull(receivedThumbnail);
-//         assertEquals("https://expectedContentUrl", receivedThumbnail.getContentUrl());
-//         assertEquals(1234, receivedThumbnail.getWidth());
-//         assertEquals(4321, receivedThumbnail.getHeight());
-//     }
-
-//     @ParameterizedTest
-//     @CsvSource({
-//         ", expectedPresentationId-1, Expected Presentation 1",
-//         "1, expectedPresentationId-2, Expected Presentation 2"
-//     })
-//     void test_get_slides_should_return_expected_slides(String nextPageToken, String expectedPresentationId, String expectedTitle) {
-//         Uni<DrivePage> result = this.slidesService.findPresentationsFromDrive(nextPageToken);
-//         DrivePage receivedPage = result.await().indefinitely();
-
-//         assertNotNull(receivedPage);
-//         assertEquals(1, receivedPage.getFiles().size());
-//         assertEquals(expectedTitle, receivedPage.getFiles().get(0).getName());
-//         assertEquals(expectedPresentationId, receivedPage.getFiles().get(0).getId());
-//     }
-// }
+        UniAssertSubscriber<PresentationWithSlidesResponse> subscriber = presentation
+            .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertFailedWith(ApplicationException.class, "Apresentação não possui slides.");
+    }
+}

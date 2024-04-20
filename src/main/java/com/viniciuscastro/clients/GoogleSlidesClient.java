@@ -29,18 +29,6 @@ public interface GoogleSlidesClient {
     Uni<GooglePresentation> getPresentation(@PathParam("presentationId") String presentationId);
 
     @GET
-    @Path("/{presentationId}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    GooglePresentation getPresentationBlocking(@PathParam("presentationId") String presentationId);
-
-    @GET
-    @Path("/{presentationId}/pages/{pageObjectId}/thumbnail")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    GoogleThumbnail getPresentationThumbnailBlocking(@PathParam("presentationId") String presentationId, @PathParam("pageObjectId") String pageObjectId);
-
-    @GET
     @Path("/{presentationId}/pages/{pageObjectId}/thumbnail")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

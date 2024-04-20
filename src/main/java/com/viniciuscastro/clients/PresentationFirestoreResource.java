@@ -14,6 +14,7 @@ import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
 import com.viniciuscastro.presentation.models.BucketFile;
 
 import io.quarkus.oidc.UserInfo;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -23,6 +24,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/firestore")
+@RequestScoped
 public class PresentationFirestoreResource {
     @Inject
     Firestore firestore;
