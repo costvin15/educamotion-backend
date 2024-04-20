@@ -1,4 +1,10 @@
 name: Build with Maven
+env:
+  KEYCLOAK_URL: http://localhost:8545/realms/educamotion
+  KEYCLOAK_CLIENT_ID: backend-service
+  KEYCLOAK_CLIENT_SECRET: client-secret
+  GOOGLE_PROJECT_ID: project-id
+  GOOGLE_SERVICE_ACCOUNT_ENCODED_KEY: service-account-key
 on:
   push:
     branches: [ "main" ]
