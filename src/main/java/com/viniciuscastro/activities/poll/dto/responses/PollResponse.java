@@ -1,4 +1,4 @@
-package com.viniciuscastro.poll.dto.responses;
+package com.viniciuscastro.activities.poll.dto.responses;
 
 import java.util.Date;
 import java.util.List;

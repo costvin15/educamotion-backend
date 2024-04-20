@@ -1,17 +1,17 @@
-package com.viniciuscastro.poll.services;
+package com.viniciuscastro.activities.poll.services;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.viniciuscastro.activities.poll.clients.PollFirestoreResource;
+import com.viniciuscastro.activities.poll.clients.requests.StoreChoiceRequest;
+import com.viniciuscastro.activities.poll.clients.requests.StorePollRequest;
+import com.viniciuscastro.activities.poll.dto.responses.ChoiceResponse;
+import com.viniciuscastro.activities.poll.dto.responses.PollResponse;
+import com.viniciuscastro.activities.poll.dto.responses.StorePollResponse;
+import com.viniciuscastro.activities.poll.models.Poll;
 import com.viniciuscastro.activity.dto.responses.ActivityResponse;
 import com.viniciuscastro.activity.services.ActivityService;
-import com.viniciuscastro.poll.clients.PollFirestoreResource;
-import com.viniciuscastro.poll.clients.requests.StoreChoiceRequest;
-import com.viniciuscastro.poll.clients.requests.StorePollRequest;
-import com.viniciuscastro.poll.dto.responses.ChoiceResponse;
-import com.viniciuscastro.poll.dto.responses.PollResponse;
-import com.viniciuscastro.poll.dto.responses.StorePollResponse;
-import com.viniciuscastro.poll.models.Poll;
 import com.viniciuscastro.presentation.dto.response.PresentationWithSlidesResponse;
 import com.viniciuscastro.presentation.services.PresentationService;
 

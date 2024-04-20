@@ -1,4 +1,4 @@
-package com.viniciuscastro.poll.models;
+package com.viniciuscastro.activities.poll.models;
 
 import java.util.UUID;
 

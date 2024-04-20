@@ -1,9 +1,9 @@
-package com.viniciuscastro.poll.controllers;
+package com.viniciuscastro.activities.poll.controllers;
 
+import com.viniciuscastro.activities.poll.dto.requests.PollRequest;
+import com.viniciuscastro.activities.poll.dto.responses.PollResponse;
+import com.viniciuscastro.activities.poll.services.PollService;
 import com.viniciuscastro.activity.dto.responses.ActivityResponse;
-import com.viniciuscastro.poll.dto.requests.PollRequest;
-import com.viniciuscastro.poll.dto.responses.PollResponse;
-import com.viniciuscastro.poll.services.PollService;
 
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;

@@ -1,4 +1,4 @@
-package com.viniciuscastro.poll.clients;
+package com.viniciuscastro.activities.poll.clients;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.viniciuscastro.activities.poll.clients.requests.StoreChoiceRequest;
+import com.viniciuscastro.activities.poll.clients.requests.StorePollRequest;
+import com.viniciuscastro.activities.poll.models.Choice;
+import com.viniciuscastro.activities.poll.models.Poll;
+import com.viniciuscastro.activities.poll.models.PollAndChoices;
 import com.viniciuscastro.exceptions.ApplicationException;
 import com.viniciuscastro.exceptions.ApplicationException.StatusCode;
-import com.viniciuscastro.poll.clients.requests.StoreChoiceRequest;
-import com.viniciuscastro.poll.clients.requests.StorePollRequest;
-import com.viniciuscastro.poll.models.Choice;
-import com.viniciuscastro.poll.models.Poll;
-import com.viniciuscastro.poll.models.PollAndChoices;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;

@@ -1,4 +1,4 @@
-package com.viniciuscastro.poll.dto.requests;
+package com.viniciuscastro.activities.poll.dto.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
