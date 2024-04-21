@@ -77,10 +77,22 @@
 #   accessed directly. (example: "foo.example.com,bar.example.com")
 #
 ###
-FROM registry.access.redhat.com/ubi8/openjdk-17:1.18
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.18 AS build
 
-ENV LANGUAGE='en_US:en'
+WORKDIR /app
 
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+
+RUN ./mvnw dependency:go-offline -B
+COPY ./src ./src
+
+RUN ./mvnw package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -B -V
+
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.18 AS runtime
+
+WORKDIR /app
 
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY --chown=185 target/quarkus-app/lib/ /deployments/lib/
