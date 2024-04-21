@@ -54,7 +54,7 @@ public class GoogleCloudStorageResource {
             byte[] bytes = blob.getContent(BlobSourceOption.generationMatch());
             return Optional.of(new ByteArrayInputStream(bytes));
         } catch (StorageException exception) {
-            throw new ApplicationException("Ocorreu um erro ao buscar imagem.", StatusCode.INTERNAL_SERVER_ERROR);
+            throw new ApplicationException("Ocorreu erro ao buscar imagem.", StatusCode.INTERNAL_SERVER_ERROR);
         }
     }
 }
