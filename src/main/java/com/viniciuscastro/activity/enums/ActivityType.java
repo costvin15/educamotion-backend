@@ -1,7 +1,8 @@
 package com.viniciuscastro.activity.enums;
 
 public enum ActivityType {
-    poll("POLL");
+    poll("POLL"),
+    free_answer("FREE_ANSWER");
 
     private final String value;
 

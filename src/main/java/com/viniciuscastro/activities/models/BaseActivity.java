@@ -2,9 +2,11 @@ package com.viniciuscastro.activities.models;
 
 import com.google.cloud.Timestamp;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public abstract class BaseActivity {
     protected String id;
     protected String presentationId;

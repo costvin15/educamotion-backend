@@ -41,11 +41,11 @@ public class PollFirestoreResource {
 
         try {
             Optional<QueryDocumentSnapshot> poll = pollsCollection.whereEqualTo("id", activityId)
-            .get()
-            .get()
-            .getDocuments()
-            .stream()
-            .findFirst();
+                .get()
+                .get()
+                .getDocuments()
+                .stream()
+                .findFirst();
 
             if (!poll.isPresent()) {
                 throw new ApplicationException("Enquete não encontrada.", StatusCode.NOT_FOUND);

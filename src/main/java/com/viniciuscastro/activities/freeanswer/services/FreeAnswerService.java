@@ -2,6 +2,7 @@ package com.viniciuscastro.activities.freeanswer.services;
 
 import com.viniciuscastro.activities.freeanswer.clients.FreeAnswerFirestoreResource;
 import com.viniciuscastro.activities.freeanswer.clients.requests.StoreFreeAnswerRequest;
+import com.viniciuscastro.activities.freeanswer.dto.responses.FreeAnswerResponse;
 import com.viniciuscastro.activities.freeanswer.dto.responses.StoreFreeAnswerResponse;
 import com.viniciuscastro.activity.dto.responses.ActivityResponse;
 import com.viniciuscastro.activity.services.ActivityService;
@@ -31,6 +32,20 @@ public class FreeAnswerService {
             .onItem().transformToUni(freeAnswer -> this.storeActivity(freeAnswer.getPresentationId(), freeAnswer.getId()));
     }
 
+    public Uni<FreeAnswerResponse> findFreeAnswerByActivityId(String activityId) {
+        return Uni.createFrom().item(this.freeAnswerFirestoreResource.findFreeAnswerByActivityId(activityId))
+            .onItem().transformToUni(freeAnswer -> {
+                return Uni.createFrom().item(new FreeAnswerResponse(
+                    freeAnswer.getId(),
+                    freeAnswer.getPresentationId(),
+                    freeAnswer.getQuestion(),
+                    freeAnswer.getMaxWords().intValue(),
+                    freeAnswer.getCreatedAt().toDate(),
+                    freeAnswer.getUpdatedAt().toDate()
+                ));
+            });
+    }
+
     private Uni<StoreFreeAnswerResponse> storeFreeAnswer(String presentationId, String question, Integer maxWords) {
         return Uni.createFrom().item(new StoreFreeAnswerRequest(question, maxWords, presentationId))
             .onItem().transform(request -> this.freeAnswerFirestoreResource.storeFreeAnswer(request))
@@ -39,7 +54,7 @@ public class FreeAnswerService {
                     freeAnswer.getId(),
                     freeAnswer.getPresentationId(),
                     freeAnswer.getQuestion(),
-                    freeAnswer.getMaxWords(),
+                    freeAnswer.getMaxWords().intValue(),
                     freeAnswer.getCreatedAt().toDate(),
                     freeAnswer.getUpdatedAt().toDate()
                 );
