@@ -52,12 +52,12 @@ pipeline {
         stage('Reports') {
             steps {
                 container('maven') {
-                    archiveArtifacts artifacts: 'target/site/jacoco-report/index.html', fingerprint: false
+                    archiveArtifacts artifacts: 'target/jacoco-report/index.html', fingerprint: false
                     publishHTML target: [
                         allowMissing: false,
                         alwaysLinkToLastBuild: false,
                         keepAll: true,
-                        reportDir: 'target/site/jacoco-report/',
+                        reportDir: 'target/jacoco-report/',
                         reportFiles: 'index.html',
                         reportName: 'JaCoCo Report'
                     ]
