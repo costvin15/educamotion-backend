@@ -1,17 +1,32 @@
 pipeline {
     agent {
-        label 'kubeagent'
-    }
-
-    tools {
-        jdk 'jdk17'
-        dockerTool 'docker'
+        kubernetes {
+            yaml'''
+                apiVersion: v1
+                kind: Pod
+                spec:
+                    containers:
+                    - name: maven
+                      image: maven:alpine
+                      command:
+                      - cat
+                      tty: true
+                      volumeMounts:
+                      - mountPath: /var/run/docker.sock
+                        name: docker-sock
+                    volumes:
+                    - name: docker-sock
+                      path: /var/run/docker.sock
+            '''
+        }
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/costvin15/educamotion-backend'
+                container('maven') {
+                    git branch: 'main', url: 'https://github.com/costvin15/educamotion-backend'
+                }
             }
         }
         stage('JaCoCo Run') {
@@ -19,7 +34,9 @@ pipeline {
                 timeout(time: 150, unit: 'MINUTES')
             }
             steps {
-                sh './mvnw -fn test clean verify'
+                container('docker') {
+                    sh './mvnw -fn test clean verify'
+                }
             }
         }
         stage('JaCoCo Report') {
@@ -27,20 +44,24 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES')
             }
             steps {
-                sh './mvnw -f pom.xml package'
+                container('maven') {
+                    sh './mvnw -f pom.xml package'
+                }
             }
         }
         stage('Reports') {
             steps {
-                archiveArtifacts artifacts: 'target/site/jacoco-report/index.html', fingerprint: false
-                publishHTML target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: false,
-                    keepAll: true,
-                    reportDir: 'target/site/jacoco-report/',
-                    reportFiles: 'index.html',
-                    reportName: 'JaCoCo Report'
-                ]
+                container('maven') {
+                    archiveArtifacts artifacts: 'target/site/jacoco-report/index.html', fingerprint: false
+                    publishHTML target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: true,
+                        reportDir: 'target/site/jacoco-report/',
+                        reportFiles: 'index.html',
+                        reportName: 'JaCoCo Report'
+                    ]
+                }
             }
         }
     }
