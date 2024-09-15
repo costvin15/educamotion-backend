@@ -35,17 +35,17 @@ import com.viniciuscastro.presentation.models.Drive;
 import com.viniciuscastro.presentation.models.DriveFile;
 import com.viniciuscastro.presentation.models.DrivePage;
 import com.viniciuscastro.presentation.models.PresentationPage;
-import com.viniciuscastro.resources.KeycloakResource;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.oidc.server.OidcWiremockTestResource;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-@QuarkusTestResource(KeycloakResource.class)
+@QuarkusTestResource(OidcWiremockTestResource.class)
 class PresentationServiceTest {
     @Inject
     PresentationService slidesService;
