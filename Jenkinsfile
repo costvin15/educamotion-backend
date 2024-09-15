@@ -1,4 +1,6 @@
 pipeline {
+    agent all
+
     tools {
         jdk 'jdk17'
         dockerTool 'docker'
