@@ -35,7 +35,7 @@ pipeline {
             }
             steps {
                 container('maven') {
-                    sh './mvnw -fn test clean verify'
+                    sh 'mvn -fn test clean verify'
                 }
             }
         }
@@ -45,7 +45,7 @@ pipeline {
             }
             steps {
                 container('maven') {
-                    sh './mvnw -f pom.xml package'
+                    sh 'mvn -f pom.xml package'
                 }
             }
         }
