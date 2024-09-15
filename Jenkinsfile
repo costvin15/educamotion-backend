@@ -1,6 +1,7 @@
 pipeline {
-    agent {
-        label 'docker' 
+    tools {
+        jdk 'jdk17'
+        docker 'docker'
     }
 
     stages {
