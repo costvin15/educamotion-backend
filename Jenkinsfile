@@ -1,7 +1,7 @@
 pipeline {
     tools {
         jdk 'jdk17'
-        docker 'docker'
+        dockerTool 'docker'
     }
 
     stages {
