@@ -34,7 +34,7 @@ pipeline {
                 timeout(time: 150, unit: 'MINUTES')
             }
             steps {
-                container('docker') {
+                container('maven') {
                     sh './mvnw -fn test clean verify'
                 }
             }
