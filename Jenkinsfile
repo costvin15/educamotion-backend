@@ -1,75 +1,53 @@
 pipeline {
-    agent {
-        kubernetes {
-            yaml'''
-                apiVersion: v1
-                kind: Pod
-                spec:
-                    containers:
-                    - name: maven
-                      image: maven:3.8.3-openjdk-17
-                      command:
-                      - cat
-                      tty: true
-                      volumeMounts:
-                      - mountPath: /var/run/docker.sock
-                        name: docker-sock
-                    volumes:
-                    - name: docker-sock
-                      path: /var/run/docker.sock
-            '''
-        }
-    }
+    agent any
 
     stages {
-        stage('Checkout') {
+        stage('SCM') {
             steps {
-                container('maven') {
-                    git branch: 'main', url: 'https://github.com/costvin15/educamotion-backend'
+                git branch: 'main', url: 'https://github.com/costvin15/educamotion-backend'
+            }
+        }
+        stage('Build and test') {
+            steps {
+                withMaven(maven: 'Maven 3.8') {
+                    sh 'mvn -fn clean test verify'
                 }
             }
         }
-        stage('JaCoCo Run') {
-            options {
-                timeout(time: 150, unit: 'MINUTES')
-            }
+        stage('Generate reports') {
             steps {
-                container('maven') {
-                    sh 'mvn -fn test clean verify'
-                }
-            }
-        }
-        stage('JaCoCo Report') {
-            options {
-                timeout(time: 5, unit: 'MINUTES')
-            }
-            steps {
-                container('maven') {
+                withMaven(maven: 'Maven 3.8') {
                     sh 'mvn -f pom.xml package'
                 }
             }
         }
-        stage('Reports') {
+        stage('Publish reports') {
             steps {
-                container('maven') {
-                    archiveArtifacts artifacts: 'target/jacoco-report/index.html', fingerprint: false
-                    publishHTML target: [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: false,
-                        keepAll: true,
-                        reportDir: 'target/jacoco-report/',
-                        reportFiles: 'index.html',
-                        reportName: 'JaCoCo Report'
-                    ]
+                archiveArtifacts artifacts: 'target/jacoco-report/index.html', fingerprint: false
+                publishHTML target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: 'target/jacoco-report/',
+                    reportFiles: 'index.html',
+                    reportName: 'JaCoCo Report'
+                ]
+            }
+        }
+        stage('SonarQube analysis') {
+            steps {
+                withSonarQubeEnv(installationName: 'educamotion-sonarqube') {
+                    withMaven(maven: 'Maven 3.8') {
+                        sh 'mvn clean package sonar:sonar'
+                    }
                 }
             }
         }
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv(installationName: 'educamotion-sonarqube') {
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922:sonar'
-                }
-            }
+    }
+
+    post {
+        always {
+            deleteDir()
         }
     }
 }
