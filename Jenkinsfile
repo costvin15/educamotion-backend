@@ -65,8 +65,10 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
-            withSonarQubeEnv(installationName: 'educamotion-sonarqube') {
-                sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922:sonar'
+            steps {
+                withSonarQubeEnv(installationName: 'educamotion-sonarqube') {
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922:sonar'
+                }
             }
         }
     }
