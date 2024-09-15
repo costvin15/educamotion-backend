@@ -7,7 +7,7 @@ pipeline {
                 spec:
                     containers:
                     - name: maven
-                      image: docker:latest
+                      image: mvn:3.8.3-jdk-17
                       command:
                       - cat
                       tty: true
