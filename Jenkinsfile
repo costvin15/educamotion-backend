@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'graalvm'
+        jdk 'jdk17'
     }
 
     stages {
