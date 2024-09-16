@@ -21,12 +21,16 @@ pipeline {
         }
     }
 
+    environment {
+        registry = 'costvin15/educamotion'
+        registryCredential = 'dockerhub_id'
+        dockerImage = ''
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                container('maven') {
-                    git branch: 'main', url: 'https://github.com/costvin15/educamotion-backend'
-                }
+                git branch: 'main', url: 'https://github.com/costvin15/educamotion-backend'
             }
         }
         stage('Performing tests') {
@@ -46,6 +50,13 @@ pipeline {
             steps {
                 container('maven') {
                     sh 'mvn -fn clean package'
+                }
+            }
+        }
+        stage('Build Docker image') {
+            steps {
+                script {
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
                 }
             }
         }
