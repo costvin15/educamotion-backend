@@ -29,23 +29,23 @@ pipeline {
                 }
             }
         }
-        stage('JaCoCo Run') {
+        stage('Performing tests') {
             options {
                 timeout(time: 150, unit: 'MINUTES')
             }
             steps {
                 container('maven') {
-                    sh 'mvn -fn test clean verify'
+                    sh 'mvn -fn clean test verify'
                 }
             }
         }
-        stage('JaCoCo Report') {
+        stage('Generate build') {
             options {
-                timeout(time: 5, unit: 'MINUTES')
+                timeout(time: 150, unit: 'MINUTES')
             }
             steps {
                 container('maven') {
-                    sh 'mvn -f pom.xml package'
+                    sh 'mvn -fn clean package'
                 }
             }
         }
@@ -72,6 +72,13 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'target/**/*.jar', fingerprint: true
+            junit 'target/surefire-reports/**/*.xml'
         }
     }
 }
