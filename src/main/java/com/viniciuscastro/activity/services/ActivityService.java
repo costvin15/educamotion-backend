@@ -2,7 +2,7 @@ package com.viniciuscastro.activity.services;
 
 import com.viniciuscastro.activity.clients.ActivityFirestoreResource;
 import com.viniciuscastro.activity.clients.requests.StoreActivityRequest;
-import com.viniciuscastro.activity.dto.responses.ActivityListResponse;
+import com.viniciuscastro.activity.dto.responses.ActivitiesResponse;
 import com.viniciuscastro.activity.dto.responses.ActivityResponse;
 import com.viniciuscastro.activity.enums.ActivityType;
 import com.viniciuscastro.activity.models.Activity;
@@ -24,7 +24,7 @@ public class ActivityService {
     @Inject
     PresentationService presentationService;
 
-    public Uni<ActivityListResponse> getActivitiesByPresentationId(String presentationId) {
+    public Uni<ActivitiesResponse> getActivitiesByPresentationId(String presentationId) {
         return Multi.createFrom().items(this.activityFirestoreResource.getActivitiesByPresentationId(presentationId))
             .onItem().transformToUniAndConcatenate(activity -> Uni.createFrom().item(() -> new ActivityResponse(
                 activity.getId(),
@@ -36,7 +36,7 @@ public class ActivityService {
                 activity.getUpdatedAt().toDate()
             )))
             .collect().asList()
-            .onItem().transformToUni(list -> Uni.createFrom().item(new ActivityListResponse(list.size(), list)));
+            .onItem().transformToUni(list -> Uni.createFrom().item(new ActivitiesResponse(list.size(), list)));
     }
 
     public Uni<ActivityResponse> validateAndStoreActivity(String presentationId, String activityId, String activityType) {

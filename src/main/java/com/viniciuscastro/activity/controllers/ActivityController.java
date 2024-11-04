@@ -1,7 +1,7 @@
 package com.viniciuscastro.activity.controllers;
 
 import com.viniciuscastro.activity.dto.requests.ActivityRequest;
-import com.viniciuscastro.activity.dto.responses.ActivityListResponse;
+import com.viniciuscastro.activity.dto.responses.ActivitiesResponse;
 import com.viniciuscastro.activity.dto.responses.ActivityResponse;
 import com.viniciuscastro.activity.services.ActivityService;
 
@@ -23,7 +23,7 @@ public class ActivityController {
     @GET
     @Path("{presentationId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<ActivityListResponse> getActivitiesByPresentationId(String presentationId) {
+    public Uni<ActivitiesResponse> getActivitiesByPresentationId(String presentationId) {
         return activityService.getActivitiesByPresentationId(presentationId);
     }
 

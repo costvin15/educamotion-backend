@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ActivityListResponse {
+public class ActivitiesResponse {
     private int total;
     private List<ActivityResponse> activities;
 }
