@@ -98,11 +98,18 @@ public class PresentationService {
     public PresentationDetailResponse getPresentationDetails(String presentationId) {
         Presentation presentation = this.getPresentation(presentationId);
 
+        GoogleSlide slide = this.googleSlidesInterface.getPresentation(presentationId);
+        List<String> pagesIds = new ArrayList<>();
+        for (Page page : slide.getSlides()) {
+            pagesIds.add(page.getObjectId());
+        }
+
         return new PresentationDetailResponse(
             presentation.getId(),
             presentation.getTitle(),
             this.googleCloudStorageInterface.fetchURL(presentationId),
             presentation.getCreated_at(),
+            pagesIds,
             this.elementService.getElementsFromPresentation(presentationId)
         );
     }
