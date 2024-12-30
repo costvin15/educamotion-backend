@@ -8,7 +8,7 @@ import lombok.Getter;
 public class ElementResponse {
     private String id;
     private String slideId;
-    private String type;
+    private String elementType;
     private Integer positionX;
     private Integer positionY;
     private Integer width;

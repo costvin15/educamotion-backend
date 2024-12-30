@@ -24,4 +24,9 @@ public class ElementRepository implements PanacheRepository<Element> {
         return find("presentation", presentation)
             .list();
     }
+
+    public Element findById(String elementId) {
+        return find("id", elementId)
+            .firstResult();
+    }
 }

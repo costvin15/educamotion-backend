@@ -96,8 +96,7 @@ public class PresentationService {
     }
 
     public PresentationDetailResponse getPresentationDetails(String presentationId) {
-        Presentation presentation = this.repository.findById(presentationId, this.userService.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("Presentation not found"));
+        Presentation presentation = this.getPresentation(presentationId);
 
         return new PresentationDetailResponse(
             presentation.getId(),
@@ -128,9 +127,18 @@ public class PresentationService {
         }
     }
 
-    private boolean verifyIfPresentationExists(String presentationId) {
+    public Presentation getPresentation(String presentationId) {
         return this.repository.findById(presentationId, this.userService.getUserId())
-            .isPresent();
+            .orElseThrow(() -> new IllegalArgumentException("Presentation not found"));
+    }
+
+    private boolean verifyIfPresentationExists(String presentationId) {
+        try {
+            this.getPresentation(presentationId);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private boolean persistPresentationPageThumbnail(String fileName, String presentationId, String pageId) {

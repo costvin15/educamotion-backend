@@ -7,4 +7,8 @@ import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class QuestionRepository implements PanacheRepository<Question> {
+    public Question findByElementId(String elementId) {
+        return this.find("id", elementId)
+            .firstResult();
+    }
 }

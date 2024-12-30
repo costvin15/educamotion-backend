@@ -6,10 +6,16 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@Builder
 @Entity(name = "element")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Element {
     @Id
     private String id;
@@ -17,6 +23,10 @@ public class Element {
     @Id
     @ManyToOne
     private Presentation presentation;
+
+    @Id
+    @Column(name = "user_id")
+    private String userId;
 
     @Id
     @Column(name = "slide_id")
