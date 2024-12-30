@@ -28,7 +28,10 @@ public class QuestionController {
         return this.questionService.createQuestionElement(
             request.getId(),
             request.getQuestion(),
-            request.getDescription()
+            request.getDescription(),
+            request.getType(),
+            request.getOptions(),
+            request.getCorrectOption()
         );
     }
 }

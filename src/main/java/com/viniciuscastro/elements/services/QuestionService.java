@@ -1,8 +1,11 @@
 package com.viniciuscastro.elements.services;
 
+import java.util.List;
+
 import com.viniciuscastro.dto.response.ElementResponse;
 import com.viniciuscastro.elements.dto.response.QuestionResponse;
 import com.viniciuscastro.elements.models.Question;
+import com.viniciuscastro.elements.models.QuestionType;
 import com.viniciuscastro.elements.repositories.QuestionRepository;
 import com.viniciuscastro.services.ElementService;
 
@@ -32,12 +35,15 @@ public class QuestionService {
         return new QuestionResponse(
             question.getId(),
             question.getTitle(),
-            question.getDescription()
+            question.getDescription(),
+            question.getType().name(),
+            question.getOptions().toArray(new String[0]),
+            question.getCorrectOption()
         );
     }
 
     @Transactional
-    public QuestionResponse createQuestionElement(String elementId, String title, String description) {
+    public QuestionResponse createQuestionElement(String elementId, String title, String description, String type, String[] options, String correctOption) {
         ElementResponse element = this.elementService.getElement(elementId);
         if (element == null) {
             throw new IllegalArgumentException("Element not found");
@@ -47,6 +53,9 @@ public class QuestionService {
             .id(elementId)
             .title(title)
             .description(description)
+            .type(QuestionType.valueOf(type))
+            .options(List.of(options))
+            .correctOption(correctOption)
             .build();
         this.questionRepository.persist(question);
 

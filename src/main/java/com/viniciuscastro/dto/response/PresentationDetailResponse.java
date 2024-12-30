@@ -16,5 +16,5 @@ public class PresentationDetailResponse {
     private URL thumbnail;
     private Date lastModified;
     private List<String> slidesIds;
-    private Map<String, ElementResponse> elements;
+    private Map<String, List<ElementResponse>> elements;
 }
