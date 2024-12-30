@@ -1,7 +1,8 @@
 package com.viniciuscastro.services;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.viniciuscastro.dto.response.ElementResponse;
@@ -63,17 +64,17 @@ public class ElementService {
         return this.getElement(createdElement.getId());
     }
 
-    public List<ElementResponse> getElementsFromPresentation(String presentationId) {
+    public Map<String, ElementResponse> getElementsFromPresentation(String presentationId) {
         List<Element> elements = this.repository.findByPresentationId(presentationId);
 
         if (elements == null) {
-            return new ArrayList<>();
+            return new HashMap<>();
         }
 
-        List<ElementResponse> response = new ArrayList<>();
+        Map<String, ElementResponse> response = new HashMap<>();
 
         for (Element element : elements) {
-            response.add(new ElementResponse(
+            response.put(element.getSlideId(), new ElementResponse(
                 element.getId(),
                 element.getSlideId(),
                 element.getType().name(),
