@@ -49,12 +49,20 @@ public class QuestionService {
             throw new IllegalArgumentException("Element not found");
         }
 
+        QuestionType questionType = QuestionType.valueOf(type);
+        List<String> optionsList = List.of(options);
+
+        if (questionType == QuestionType.DISCURSIVE) {
+            optionsList = List.of();
+            correctOption = null;
+        }
+
         Question question = Question.builder()
             .id(elementId)
             .title(title)
             .description(description)
-            .type(QuestionType.valueOf(type))
-            .options(List.of(options))
+            .type(questionType)
+            .options(optionsList)
             .correctOption(correctOption)
             .build();
         this.questionRepository.persist(question);
