@@ -55,7 +55,7 @@ public class PresentationService {
                 presentation.getId(),
                 presentation.getTitle(),
                 this.googleCloudStorageInterface.fetchURL(presentation.getId()),
-                presentation.getCreated_at()
+                presentation.getCreatedAt()
             ));
         }
 
@@ -108,7 +108,7 @@ public class PresentationService {
             presentation.getId(),
             presentation.getTitle(),
             this.googleCloudStorageInterface.fetchURL(presentationId),
-            presentation.getCreated_at(),
+            presentation.getCreatedAt(),
             pagesIds,
             this.elementService.getElementsFromPresentation(presentationId)
         );
@@ -139,7 +139,7 @@ public class PresentationService {
             .orElseThrow(() -> new IllegalArgumentException("Presentation not found"));
     }
 
-    private boolean verifyIfPresentationExists(String presentationId) {
+    public boolean verifyIfPresentationExists(String presentationId) {
         try {
             this.getPresentation(presentationId);
             return true;

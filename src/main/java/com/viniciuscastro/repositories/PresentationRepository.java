@@ -11,12 +11,12 @@ import jakarta.enterprise.context.RequestScoped;
 @RequestScoped
 public class PresentationRepository implements PanacheRepository<Presentation> {
     public Optional<Presentation> findById(String id, String user) {
-        return find("id = ?1 and user_id = ?2", id, user)
+        return find("id = ?1 and userId = ?2", id, user)
             .firstResultOptional();
     }
 
     public List<Presentation> findByUserId(String userId) {
-        return find("user_id", userId)
+        return find("userId", userId)
             .list();
     }
 }

@@ -20,8 +20,12 @@ import lombok.Setter;
 public class Presentation {
     @Id
     private String id;
+
     private String title;
-    @Column(length = 36)
-    private String user_id;
-    private Date created_at;
+
+    @Column(name = "user_id", length = 36)
+    private String userId;
+
+    @Column(name = "created_at")
+    private Date createdAt;
 }
