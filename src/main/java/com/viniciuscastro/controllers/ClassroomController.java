@@ -3,6 +3,7 @@ package com.viniciuscastro.controllers;
 import java.util.List;
 import java.util.Optional;
 
+import com.viniciuscastro.dto.response.UserAttendanceResponse;
 import com.viniciuscastro.models.classroom.Classroom;
 import com.viniciuscastro.services.ClassroomAttendanceService;
 import com.viniciuscastro.services.ClassroomService;
@@ -44,7 +45,7 @@ public class ClassroomController {
 
     @GET
     @Path("attendances/{classroomId}")
-    public List<String> getAttendances(String classroomId) {
+    public List<UserAttendanceResponse> getAttendances(String classroomId) {
         return this.classroomService.getAttendances(classroomId);
     }
 

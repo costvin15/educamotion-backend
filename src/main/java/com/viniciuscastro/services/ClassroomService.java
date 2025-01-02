@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import com.viniciuscastro.dto.response.UserAttendanceResponse;
 import com.viniciuscastro.models.classroom.Classroom;
 import com.viniciuscastro.models.presentations.Presentation;
 import com.viniciuscastro.repositories.ClassroomRepository;
@@ -76,7 +77,7 @@ public class ClassroomService {
         return createdClassroom.get();
     }
 
-    public List<String> getAttendances(String classroomId) {
+    public List<UserAttendanceResponse> getAttendances(String classroomId) {
         Optional<Classroom> classroom = this.getClassroomByClassroomId(classroomId);
         if (!classroom.isPresent()) {
             throw new RuntimeException("Classroom does not exist");
@@ -84,11 +85,12 @@ public class ClassroomService {
 
         Log.info(this.classroomAttendanceService.getClassroomAttendances(classroomId).size());
 
-        List<String> attendances = new ArrayList<>();
+        List<UserAttendanceResponse> attendances = new ArrayList<>();
         for (WebSocketConnection connection : this.classroomAttendanceService.getClassroomAttendances(classroomId)) {
             String userId = connection.userData().get(TypedKey.forString("userId"));
             UserRepresentation user = keycloak.realm("educamotion").users().get(userId).toRepresentation();
-            attendances.add(user.getUsername());
+            UserAttendanceResponse attendance = new UserAttendanceResponse(user.getId(), user.getFirstName() + " " + user.getLastName(), user.firstAttribute("picture"));
+            attendances.add(attendance);
         }
 
         return attendances;
