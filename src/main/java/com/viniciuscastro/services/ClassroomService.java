@@ -2,6 +2,7 @@ package com.viniciuscastro.services;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.viniciuscastro.models.classroom.Classroom;
@@ -23,9 +24,12 @@ public class ClassroomService {
     @Inject
     PresentationService presentationService;
 
-    public Classroom getClassroom(String presentationId) {
-        return repository.findByUserIdAndPresentationId(userService.getUserId(), presentationId)
-            .orElseThrow(() -> new RuntimeException("Classroom does not exist"));
+    public Optional<Classroom> getClassroomByPresentationId(String presentationId) {
+        return repository.findByUserIdAndPresentationId(userService.getUserId(), presentationId);
+    }
+
+    public Optional<Classroom> getClassroomByClassroomId(String classroomId) {
+        return repository.findByUserIdAndClassroomId(userService.getUserId(), classroomId);
     }
 
     @Transactional
@@ -51,6 +55,10 @@ public class ClassroomService {
 
         this.repository.persist(classroom);
 
-        return this.getClassroom(presentationId);
+        Optional<Classroom> createdClassroom = this.getClassroomByPresentationId(presentationId);
+        if (!createdClassroom.isPresent()) {
+            throw new RuntimeException("Error creating classroom");
+        }
+        return createdClassroom.get();
     }
 }
