@@ -31,7 +31,7 @@ public class ElementService {
         Element element = this.repository.findById(elementId);
 
         if (element == null) {
-            return null;
+            throw new RuntimeException("Element not found");
         }
 
         return new ElementResponse(
@@ -63,6 +63,23 @@ public class ElementService {
         this.repository.persist(createdElement);
 
         return this.getElement(createdElement.getId());
+    }
+
+    @Transactional
+    public ElementResponse updateElement(String elementId, int positionX, int positionY, int width, int height) {
+        Element element = this.repository.findById(elementId);
+
+        if (element == null) {
+            throw new RuntimeException("Element not found");
+        }
+
+        element.setPositionX(positionX);
+        element.setPositionY(positionY);
+        element.setWidth(width);
+        element.setHeight(height);
+        this.repository.persist(element);
+
+        return this.getElement(element.getId());
     }
 
     public Map<String, List<ElementResponse>> getElementsFromPresentation(String presentationId) {

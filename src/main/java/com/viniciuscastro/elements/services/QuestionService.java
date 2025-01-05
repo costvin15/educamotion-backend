@@ -69,4 +69,30 @@ public class QuestionService {
 
         return this.getQuestionElement(elementId);
     }
+
+    @Transactional
+    public QuestionResponse updateQuestionElement(String questionId, String title, String description, String type, String[] options, String correctOption) {
+        Question question = this.questionRepository.findByElementId(questionId);
+        if (question == null) {
+            throw new IllegalArgumentException("Question not found");
+        }
+
+        QuestionType questionType = QuestionType.valueOf(type);
+        List<String> optionsList = List.of(options);
+
+        if (questionType == QuestionType.DISCURSIVE) {
+            optionsList = List.of();
+            correctOption = null;
+        }
+
+        question.setTitle(title);
+        question.setDescription(description);
+        question.setType(questionType);
+        question.setOptions(optionsList);
+        question.setCorrectOption(correctOption);
+
+        this.questionRepository.persist(question);
+
+        return this.getQuestionElement(questionId);
+    }
 }
