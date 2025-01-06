@@ -3,6 +3,7 @@ package com.viniciuscastro.controllers;
 import java.util.List;
 import java.util.Optional;
 
+import com.viniciuscastro.dto.response.UserAttendanceListResponse;
 import com.viniciuscastro.dto.response.UserAttendanceResponse;
 import com.viniciuscastro.models.classroom.Classroom;
 import com.viniciuscastro.services.ClassroomAttendanceService;
@@ -34,19 +35,30 @@ public class ClassroomController {
     UserService userService;
 
     @GET
-    @Path("get/{classroomId}")
+    @Path("{classroomId}")
     public Classroom getClassroom(String classroomId) {
         Optional<Classroom> classroom = this.classroomService.getClassroomByClassroomId(classroomId);
-        if (classroom.isPresent()) {
-            return classroom.get();
+        if (classroom.isEmpty()) {
+            throw new RuntimeException("Classroom not found");
         }
-        return null;
+        return classroom.get();
+    }
+
+    @GET
+    @Path("presentation/{presentationId}")
+    public Classroom getClassroomByPresentationId(String presentationId) {
+        Optional<Classroom> classroom = this.classroomService.getClassroomByPresentationId(presentationId);
+        if (classroom.isEmpty()) {
+            throw new RuntimeException("Classroom not found");
+        }
+        return classroom.get();
     }
 
     @GET
     @Path("attendances/{classroomId}")
-    public List<UserAttendanceResponse> getAttendances(String classroomId) {
-        return this.classroomService.getAttendances(classroomId);
+    public UserAttendanceListResponse getAttendances(String classroomId) {
+        List<UserAttendanceResponse> attendances = this.classroomService.getAttendances(classroomId);
+        return new UserAttendanceListResponse(attendances);
     }
 
     @POST
