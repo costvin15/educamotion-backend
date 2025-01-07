@@ -18,4 +18,9 @@ public class ClassroomRepository implements PanacheRepository<Classroom> {
         return find("userId = ?1 and id = ?2 and active = true", userId, classroomId)
             .firstResultOptional();
     }
+
+    public Optional<Classroom> findByClassroomId(String classroomId) {
+        return find("id = ?1 and active = true", classroomId)
+            .firstResultOptional();
+    }
 }
