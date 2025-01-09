@@ -39,6 +39,10 @@ public class ClassroomService {
         return repository.findByClassroomId(classroomId);
     }
 
+    public Optional<Classroom> getClassroomByEntryCode(String entryCode) {
+        return repository.findByEntryCode(entryCode);
+    }
+
     @Transactional
     public Classroom createClassroom(String presentationId) {
         if (repository.findByUserIdAndPresentationId(userService.getUserId(), presentationId).isPresent()) {
@@ -49,15 +53,13 @@ public class ClassroomService {
             throw new RuntimeException("Presentation does not exist");
         }
 
+        String entryCode = this.generateEntryCode();
         Presentation presentation = presentationService.getPresentation(presentationId);
         Classroom classroom = new Classroom(
             UUID.randomUUID().toString(),
             userService.getUserId(),
-            presentation,
-            true,
-            Date.from(Instant.now()),
-            Date.from(Instant.now()),
-            null
+            entryCode,
+            presentation
         );
 
         this.repository.persist(classroom);
@@ -69,6 +71,20 @@ public class ClassroomService {
         return createdClassroom.get();
     }
 
+    @Transactional
+    public Classroom changeSlide(String classroomId, String slide) {
+        Optional<Classroom> classroom = this.getClassroomByClassroomId(classroomId);
+        if (classroom.isEmpty()) {
+            throw new RuntimeException("Classroom not found");
+        }
+
+        classroom.get().setCurrentSlide(slide);
+        classroom.get().setUpdatedAt(Date.from(Instant.now()));
+
+        this.repository.persist(classroom.get());
+        return classroom.get();
+    }
+
     @CacheResult(cacheName = "get-user-information")
     public UserAttendanceResponse getUserInformation(String userId) {
         UserRepresentation user = keycloak.realm("educamotion").users().get(userId).toRepresentation();
@@ -77,5 +93,14 @@ public class ClassroomService {
             user.getFirstName() + " " + user.getLastName(),
             user.firstAttribute("picture")
         );
+    }
+
+    private String generateEntryCode() {
+        String entryCode = UUID.randomUUID().toString()
+            .substring(0, 8);
+        if (this.repository.existsByEntryCode(entryCode)) {
+            return this.generateEntryCode();
+        }
+        return entryCode;
     }
 }

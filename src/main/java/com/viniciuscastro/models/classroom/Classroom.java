@@ -1,5 +1,6 @@
 package com.viniciuscastro.models.classroom;
 
+import java.time.Instant;
 import java.util.Date;
 
 import com.viniciuscastro.models.presentations.Presentation;
@@ -13,7 +14,9 @@ import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +36,12 @@ public class Classroom {
     @Id
     private Boolean active;
 
+    @Column(name = "current_slide")
+    private String currentSlide;
+
+    @Column(name = "entry_code", unique = true)
+    private String entryCode;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private Date createdAt;
@@ -44,4 +53,15 @@ public class Classroom {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "closed_at")
     private Date closedAt;
+
+    public Classroom(String id, String userId, String entryCode, Presentation presentation) {
+        this.id = id;
+        this.userId = userId;
+        this.entryCode = entryCode;
+        this.presentation = presentation;
+        this.active = true;
+        this.createdAt = Date.from(Instant.now());
+        this.updatedAt = Date.from(Instant.now());
+        this.closedAt = null;
+    }
 }

@@ -23,4 +23,15 @@ public class ClassroomRepository implements PanacheRepository<Classroom> {
         return find("id = ?1 and active = true", classroomId)
             .firstResultOptional();
     }
+
+    public Optional<Classroom> findByEntryCode(String entryCode) {
+        return find("entryCode = ?1 and active = true", entryCode)
+            .firstResultOptional();
+    }
+
+    public boolean existsByEntryCode(String entryCode) {
+        return find("entryCode = ?1 and active = true", entryCode)
+            .firstResultOptional()
+            .isPresent();
+    }
 }

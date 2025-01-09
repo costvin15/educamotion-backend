@@ -14,6 +14,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 
 @Authenticated
 @Path("presentation")
@@ -38,6 +39,13 @@ public class PresentationController {
     }
 
     @GET
+    @Path("available")
+    public PresentationListResponse getAvailablePresentations(@QueryParam(value = "search") String searchQuery) {
+        List<PresentationResponse> presentations = this.presentationService.getAvailablePresentations(searchQuery);
+        return new PresentationListResponse(presentations);
+    }
+
+    @GET
     @Path("detail/{presentationId}")
     public PresentationDetailResponse getPresentationDetails(String presentationId) {
         return this.presentationService.getPresentationDetails(presentationId);
@@ -47,6 +55,6 @@ public class PresentationController {
     @Path("thumbnail/{presentationId}/{slideId}")
     @Produces("image/png")
     public byte[] fetchImage(String presentationId, String slideId) {
-        return this.presentationService.getPresentationThumbnail(presentationId, slideId);
+        return this.presentationService.getStoredThumbnail(presentationId, slideId);
     }
 }

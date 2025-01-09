@@ -5,22 +5,29 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import com.viniciuscastro.dto.request.GoogleDriveSearchRequest;
+import com.viniciuscastro.dto.response.GoogleDriveFileResponse;
+import com.viniciuscastro.dto.response.GoogleDriveSearchResponse;
 import com.viniciuscastro.dto.response.PresentationDetailResponse;
 import com.viniciuscastro.dto.response.PresentationResponse;
 import com.viniciuscastro.interfaces.GoogleCloudStorageInterface;
+import com.viniciuscastro.interfaces.GoogleDriveInterface;
 import com.viniciuscastro.interfaces.GoogleSlidesInterface;
 import com.viniciuscastro.models.googleslide.GoogleSlide;
 import com.viniciuscastro.models.googleslide.GoogleSlideImage;
 import com.viniciuscastro.models.googleslide.Page;
 import com.viniciuscastro.models.presentations.Presentation;
+import com.viniciuscastro.models.presentations.SlidePage;
 import com.viniciuscastro.repositories.PresentationRepository;
+import com.viniciuscastro.repositories.SlidePageRepository;
 
-import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -34,17 +41,24 @@ public class PresentationService {
     ElementService elementService;
 
     @Inject
-    PresentationRepository repository;
+    PresentationRepository presentationRepository;
+
+    @Inject
+    SlidePageRepository slidePageRepository;
+
+    @Inject
+    GoogleCloudStorageInterface googleCloudStorageInterface;
 
     @Inject
     @RestClient
     GoogleSlidesInterface googleSlidesInterface;
 
     @Inject
-    GoogleCloudStorageInterface googleCloudStorageInterface;
+    @RestClient
+    GoogleDriveInterface googleDriveInterface;
 
     public List<PresentationResponse> getPresentations() {
-        List<Presentation> presentations = this.repository.findByUserId(
+        List<Presentation> presentations = this.presentationRepository.findByUserId(
             this.userService.getUserId()
         );
 
@@ -62,28 +76,34 @@ public class PresentationService {
         return response;
     }
 
-    @Transactional
-    public PresentationDetailResponse addPresentation(String presentationId) {
-        if (this.verifyIfPresentationExists(presentationId)) {
-            // TODO: Add error handling
-            throw new IllegalArgumentException("Presentation already exists");
+    public List<PresentationResponse> getAvailablePresentations(String search) {
+        GoogleDriveSearchRequest request = new GoogleDriveSearchRequest();
+        request.setQ(String.format("mimeType='application/vnd.google-apps.presentation' and name contains '%s'", search));
+        request.setPageSize(30);
+        GoogleDriveSearchResponse driveResponse = this.googleDriveInterface.findFiles(request);
+        List<PresentationResponse> response = new ArrayList<>();
+
+        for (GoogleDriveFileResponse file : driveResponse.getFiles()) {
+            response.add(new PresentationResponse(
+                file.getId(),
+                file.getName()
+            ));
         }
 
+        return response;
+    }
+
+    @Transactional
+    public PresentationDetailResponse addPresentation(String presentationId) {
         GoogleSlide slide = this.googleSlidesInterface.getPresentation(presentationId);
-        this.repository.persist(new Presentation(
+        this.presentationRepository.persist(new Presentation(
             slide.getPresentationId(),
             slide.getTitle(),
             this.userService.getUserId(),
             Date.from(Instant.now())
         ));
 
-        for (Page page : slide.getSlides()) {
-            this.persistPresentationPageThumbnail(
-                String.format("%s/%s", presentationId, page.getObjectId()),
-                presentationId,
-                page.getObjectId()
-            );
-        }
+        Optional<Presentation> presentation = this.presentationRepository.findById(presentationId);
 
         if (slide.getSlides().length > 0) {
             String pageId = slide.getSlides()[0].getObjectId();
@@ -92,16 +112,30 @@ public class PresentationService {
             // TODO: Add error handling
         }
 
+        for (int i = 0; i < slide.getSlides().length; i++) {
+            Page page = slide.getSlides()[i];
+            String filename = String.format("%s/%s", presentationId, page.getObjectId());
+            this.persistPresentationPageThumbnail(filename, presentationId, page.getObjectId());
+            SlidePage slidePage = new SlidePage(
+                presentation.get(),
+                this.userService.getUserId(),
+                page.getObjectId(),
+                i,
+                filename
+            );
+            this.slidePageRepository.persist(slidePage);
+        }
+
         return this.getPresentationDetails(presentationId);
     }
 
     public PresentationDetailResponse getPresentationDetails(String presentationId) {
         Presentation presentation = this.getPresentation(presentationId);
 
-        GoogleSlide slide = this.googleSlidesInterface.getPresentation(presentationId);
-        List<String> pagesIds = new ArrayList<>();
-        for (Page page : slide.getSlides()) {
-            pagesIds.add(page.getObjectId());
+        List<SlidePage> pages = this.slidePageRepository.findByPresentationId(presentation);
+        String[] pagesIds = new String[pages.size()];
+        for (SlidePage page : pages) {
+            pagesIds[page.getSlideIndex()] = page.getSlideId();
         }
 
         return new PresentationDetailResponse(
@@ -109,13 +143,54 @@ public class PresentationService {
             presentation.getTitle(),
             this.googleCloudStorageInterface.fetchURL(presentationId),
             presentation.getCreatedAt(),
-            pagesIds,
+            Arrays.asList(pagesIds),
             this.elementService.getElementsFromPresentation(presentationId)
         );
     }
 
-    @CacheResult(cacheName = "get-thumbnail-from-presentation-page")
-    public byte[] getPresentationThumbnail(String presentationId, String pageId) {
+    // TODO: Adicionar essa URL no retorno da rota do espectador
+    public URL retrievePresentationThumbnail(String presentationId, String pageId) {
+        return this.googleCloudStorageInterface.fetchURL(
+            String.format("%s/%s", presentationId, pageId)
+        );
+    }
+
+    public Presentation getPresentation(String presentationId) {
+        return this.presentationRepository.findById(presentationId)
+            .orElseThrow(() -> new IllegalArgumentException("Presentation not found"));
+    }
+
+    public boolean verifyIfPresentationExists(String presentationId) {
+        try {
+            this.getPresentation(presentationId);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public byte[] getStoredThumbnail(String presentationId, String pageId) {
+        URL fileURL = this.googleCloudStorageInterface.fetchURL(
+            String.format("%s/%s", presentationId, pageId)
+        );
+
+        try {
+            BufferedInputStream input = new BufferedInputStream(fileURL.openStream());
+            byte[] image = input.readAllBytes();
+            input.close();
+            return image;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Error fetching image");
+        }
+    }
+
+    private boolean persistPresentationPageThumbnail(String fileName, String presentationId, String pageId) {
+        byte[] thumbnail = this.getPresentationThumbnailFromSlidesAPI(presentationId, pageId);
+        this.googleCloudStorageInterface.storeFile(fileName, "image/png", thumbnail);
+        return true;
+    }
+
+    private byte[] getPresentationThumbnailFromSlidesAPI(String presentationId, String pageId) {
         GoogleSlide slide = this.googleSlidesInterface.getPresentation(presentationId);
         Page[] pages = slide.getSlides();
         if (pages.length == 0) {
@@ -132,25 +207,5 @@ public class PresentationService {
         } catch (IOException e) {
             throw new IllegalArgumentException("Error fetching image");
         }
-    }
-
-    public Presentation getPresentation(String presentationId) {
-        return this.repository.findById(presentationId, this.userService.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("Presentation not found"));
-    }
-
-    public boolean verifyIfPresentationExists(String presentationId) {
-        try {
-            this.getPresentation(presentationId);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    private boolean persistPresentationPageThumbnail(String fileName, String presentationId, String pageId) {
-        byte[] thumbnail = this.getPresentationThumbnail(presentationId, pageId);
-        this.googleCloudStorageInterface.storeFile(fileName, "image/png", thumbnail);
-        return true;
     }
 }
