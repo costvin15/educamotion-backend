@@ -2,6 +2,7 @@ package com.viniciuscastro.controllers;
 
 import java.util.List;
 
+import com.viniciuscastro.dto.response.AvailablePresentationListResponse;
 import com.viniciuscastro.dto.response.PresentationDetailResponse;
 import com.viniciuscastro.dto.response.PresentationListResponse;
 import com.viniciuscastro.dto.response.PresentationResponse;
@@ -40,9 +41,11 @@ public class PresentationController {
 
     @GET
     @Path("available")
-    public PresentationListResponse getAvailablePresentations(@QueryParam(value = "search") String searchQuery) {
-        List<PresentationResponse> presentations = this.presentationService.getAvailablePresentations(searchQuery);
-        return new PresentationListResponse(presentations);
+    public AvailablePresentationListResponse getAvailablePresentations(@QueryParam(value = "search") String searchQuery, @QueryParam(value = "nextPageToken") String nextPageToken) {
+        if (nextPageToken == null) {
+            nextPageToken = "";
+        }
+        return this.presentationService.getAvailablePresentations(searchQuery, nextPageToken);
     }
 
     @GET

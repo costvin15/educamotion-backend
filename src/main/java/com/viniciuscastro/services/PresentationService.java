@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import com.viniciuscastro.dto.request.GoogleDriveSearchRequest;
+import com.viniciuscastro.dto.response.AvailablePresentationListResponse;
 import com.viniciuscastro.dto.response.GoogleDriveFileResponse;
 import com.viniciuscastro.dto.response.GoogleDriveSearchResponse;
 import com.viniciuscastro.dto.response.PresentationDetailResponse;
@@ -76,10 +77,11 @@ public class PresentationService {
         return response;
     }
 
-    public List<PresentationResponse> getAvailablePresentations(String search) {
+    public AvailablePresentationListResponse getAvailablePresentations(String search, String nextPageToken) {
         GoogleDriveSearchRequest request = new GoogleDriveSearchRequest();
         request.setQ(String.format("mimeType='application/vnd.google-apps.presentation' and name contains '%s'", search));
         request.setPageSize(30);
+        request.setPageToken(nextPageToken);
         GoogleDriveSearchResponse driveResponse = this.googleDriveInterface.findFiles(request);
         List<PresentationResponse> response = new ArrayList<>();
 
@@ -90,7 +92,10 @@ public class PresentationService {
             ));
         }
 
-        return response;
+        return new AvailablePresentationListResponse(
+            response,
+            driveResponse.getNextPageToken()
+        );
     }
 
     @Transactional
