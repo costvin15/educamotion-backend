@@ -98,15 +98,9 @@ public class PresentationService {
         );
     }
 
-    @Transactional
     public PresentationDetailResponse addPresentation(String presentationId) {
         GoogleSlide slide = this.googleSlidesInterface.getPresentation(presentationId);
-        this.presentationRepository.persist(new Presentation(
-            slide.getPresentationId(),
-            slide.getTitle(),
-            this.userService.getUserId(),
-            Date.from(Instant.now())
-        ));
+        this.persistPresentation(presentationId, slide.getTitle());
 
         Optional<Presentation> presentation = this.presentationRepository.findById(presentationId);
 
@@ -121,14 +115,7 @@ public class PresentationService {
             Page page = slide.getSlides()[i];
             String filename = String.format("%s/%s", presentationId, page.getObjectId());
             this.persistPresentationPageThumbnail(filename, presentationId, page.getObjectId());
-            SlidePage slidePage = new SlidePage(
-                presentation.get(),
-                this.userService.getUserId(),
-                page.getObjectId(),
-                i,
-                filename
-            );
-            this.slidePageRepository.persist(slidePage);
+            this.persistSlidePage(presentation.get(), page.getObjectId(), i, filename);
         }
 
         return this.getPresentationDetails(presentationId);
@@ -212,5 +199,28 @@ public class PresentationService {
         } catch (IOException e) {
             throw new IllegalArgumentException("Error fetching image");
         }
+    }
+
+    @Transactional
+    public boolean persistPresentation(String presentationId, String title) {
+        this.presentationRepository.persist(new Presentation(
+            presentationId,
+            title,
+            this.userService.getUserId(),
+            Date.from(Instant.now())
+        ));
+        return true;
+    }
+
+    @Transactional
+    public boolean persistSlidePage(Presentation presentation, String slideId, int index, String filename) {
+        this.slidePageRepository.persist(new SlidePage(
+            presentation,
+            this.userService.getUserId(),
+            slideId,
+            index,
+            filename
+        ));
+        return true;
     }
 }
