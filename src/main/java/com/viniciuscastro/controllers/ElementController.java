@@ -7,6 +7,7 @@ import com.viniciuscastro.services.ElementService;
 
 import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -37,5 +38,11 @@ public class ElementController {
             elementRequest.getWidth(),
             elementRequest.getHeight()
         );
+    }
+
+    @DELETE
+    @Path("delete")
+    public void deleteElement(String elementId) {
+        this.elementService.deleteElement(elementId);
     }
 }

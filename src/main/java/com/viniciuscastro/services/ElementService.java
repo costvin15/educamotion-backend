@@ -85,6 +85,19 @@ public class ElementService {
         return this.getElement(element.getId());
     }
 
+    @Transactional
+    public void deleteElement(String elementId) {
+        Element element = this.repository.findById(elementId);
+
+        if (element == null) {
+            throw new RuntimeException("Element not found");
+        }
+
+        presentationService.updateLastModified(element.getPresentation().getId());
+
+        this.repository.delete(element);
+    }
+
     public Map<String, List<ElementResponse>> getElementsFromPresentation(String presentationId) {
         List<Element> elements = this.repository.findByPresentationId(presentationId);
 
