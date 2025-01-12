@@ -28,4 +28,7 @@ public class Presentation {
 
     @Column(name = "created_at")
     private Date createdAt;
+
+    @Column(name = "last_modified")
+    private Date lastModified;
 }

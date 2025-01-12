@@ -48,6 +48,7 @@ public class ElementService {
     @Transactional
     public ElementResponse createElement(String presentationId, String slideId, String elementType) {
         Presentation presentation = this.presentationService.getPresentation(presentationId);
+        presentationService.updateLastModified(presentationId);
 
         Element createdElement = Element.builder()
             .id(UUID.randomUUID().toString())
@@ -72,6 +73,8 @@ public class ElementService {
         if (element == null) {
             throw new RuntimeException("Element not found");
         }
+
+        presentationService.updateLastModified(element.getPresentation().getId());
 
         element.setPositionX(positionX);
         element.setPositionY(positionY);

@@ -12,6 +12,7 @@ public class PresentationResponse {
     private String id;
     private String title;
     private URL thumbnail;
+    private Date createdAt;
     private Date lastModified;
 
     public PresentationResponse(String id, String title) {

@@ -70,7 +70,8 @@ public class PresentationService {
                 presentation.getId(),
                 presentation.getTitle(),
                 this.googleCloudStorageInterface.fetchURL(presentation.getId()),
-                presentation.getCreatedAt()
+                presentation.getCreatedAt(),
+                presentation.getLastModified()
             ));
         }
 
@@ -207,6 +208,7 @@ public class PresentationService {
             presentationId,
             title,
             this.userService.getUserId(),
+            Date.from(Instant.now()),
             Date.from(Instant.now())
         ));
         return true;
@@ -222,5 +224,12 @@ public class PresentationService {
             filename
         ));
         return true;
+    }
+
+    @Transactional
+    public void updateLastModified(String presentationId) {
+        Presentation presentation = this.getPresentation(presentationId);
+        presentation.setLastModified(Date.from(Instant.now()));
+        this.presentationRepository.persist(presentation);
     }
 }

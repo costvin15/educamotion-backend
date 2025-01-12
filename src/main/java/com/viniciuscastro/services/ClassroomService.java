@@ -55,6 +55,8 @@ public class ClassroomService {
 
         String entryCode = this.generateEntryCode();
         Presentation presentation = presentationService.getPresentation(presentationId);
+        presentationService.updateLastModified(presentationId);
+
         Classroom classroom = new Classroom(
             UUID.randomUUID().toString(),
             userService.getUserId(),
