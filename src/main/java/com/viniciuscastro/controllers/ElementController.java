@@ -41,7 +41,7 @@ public class ElementController {
     }
 
     @DELETE
-    @Path("delete")
+    @Path("delete/{elementId}")
     public void deleteElement(String elementId) {
         this.elementService.deleteElement(elementId);
     }
