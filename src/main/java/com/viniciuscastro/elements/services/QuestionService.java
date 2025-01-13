@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.viniciuscastro.dto.response.ElementResponse;
+import com.viniciuscastro.elements.dto.response.PartialQuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionResponse;
 import com.viniciuscastro.elements.models.Question;
@@ -108,7 +109,7 @@ public class QuestionService {
         return this.getQuestionElement(questionId);
     }
 
-    public QuestionAnswerResponse getQuestionAnswer(String elementId) {
+    public PartialQuestionAnswerResponse getQuestionAnswer(String elementId) {
         Question question = this.questionRepository.findByElementId(elementId);
         if (question == null) {
             throw new IllegalArgumentException("Question not found");
@@ -119,10 +120,9 @@ public class QuestionService {
             throw new IllegalArgumentException("Question not answered");
         }
 
-        return new QuestionAnswerResponse(
+        return new PartialQuestionAnswerResponse(
             questionAnswer.getQuestion().getId(),
             questionAnswer.getAnswer(),
-            questionAnswer.isCorrect(),
             questionAnswer.getAnsweredAt()
         );
     }

@@ -3,6 +3,7 @@ package com.viniciuscastro.elements.controllers;
 import com.viniciuscastro.elements.dto.request.QuestionAnswerRequest;
 import com.viniciuscastro.elements.dto.request.CreateQuestionRequest;
 import com.viniciuscastro.elements.dto.request.UpdateQuestionRequest;
+import com.viniciuscastro.elements.dto.response.PartialQuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionResponse;
 import com.viniciuscastro.elements.services.QuestionService;
@@ -50,6 +51,12 @@ public class QuestionController {
             request.getOptions(),
             request.getCorrectOption()
         );
+    }
+
+    @GET
+    @Path("answer/{elementId}")
+    public PartialQuestionAnswerResponse getAnswer(String elementId) {
+        return this.questionService.getQuestionAnswer(elementId);
     }
 
     @POST
