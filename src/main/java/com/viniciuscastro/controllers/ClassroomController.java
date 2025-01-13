@@ -59,6 +59,12 @@ public class ClassroomController {
         return this.classroomService.createClassroom(presentationId);
     }
 
+    @POST
+    @Path("close/{classroomId}")
+    public Classroom closeClassroom(String classroomId) {
+        return this.classroomService.closeClassroom(classroomId);
+    }
+
     @PUT
     @Path("change-slide/{classroomId}/{slide}")
     public Classroom changeSlide(String classroomId, String slide) {

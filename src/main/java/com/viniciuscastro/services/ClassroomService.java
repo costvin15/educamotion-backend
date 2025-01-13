@@ -87,6 +87,18 @@ public class ClassroomService {
         return classroom.get();
     }
 
+    @Transactional
+    public Classroom closeClassroom(String classroomId) {
+        Optional<Classroom> classroom = this.getClassroomByClassroomId(classroomId);
+        if (classroom.isEmpty()) {
+            throw new RuntimeException("Classroom not found");
+        }
+
+        classroom.get().setClosedAt(Date.from(Instant.now()));
+        this.repository.persist(classroom.get());
+        return classroom.get();
+    }
+
     @CacheResult(cacheName = "get-user-information")
     public UserAttendanceResponse getUserInformation(String userId) {
         UserRepresentation user = keycloak.realm("educamotion").users().get(userId).toRepresentation();
