@@ -134,10 +134,14 @@ public class QuestionService {
             throw new IllegalArgumentException("Question not found");
         }
 
+        QuestionAnswer questionAnswer = this.questionAnswerRepository.findByQuestionIdAndUserId(elementId, this.userService.getUserId());
+        if (questionAnswer == null) {
+            questionAnswer = new QuestionAnswer();
+        }
+
         String correctOption = question.getCorrectOption();
         boolean correct = correctOption == null || correctOption.equals(answer);
 
-        QuestionAnswer questionAnswer = new QuestionAnswer();
         questionAnswer.setQuestion(question);
         questionAnswer.setUserId(this.userService.getUserId());
         questionAnswer.setAnswer(answer);
