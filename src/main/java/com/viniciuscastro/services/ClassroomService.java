@@ -94,6 +94,7 @@ public class ClassroomService {
             throw new RuntimeException("Classroom not found");
         }
 
+        classroom.get().setActive(false);
         classroom.get().setClosedAt(Date.from(Instant.now()));
         this.repository.persist(classroom.get());
         return classroom.get();

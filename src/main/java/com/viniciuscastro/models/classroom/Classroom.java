@@ -33,7 +33,6 @@ public class Classroom {
     @ManyToOne
     private Presentation presentation;
 
-    @Id
     private Boolean active;
 
     @Column(name = "current_slide")
