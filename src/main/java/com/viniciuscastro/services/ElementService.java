@@ -41,7 +41,8 @@ public class ElementService {
             element.getPositionX(),
             element.getPositionY(),
             element.getWidth(),
-            element.getHeight()
+            element.getHeight(),
+            element.getUserId().equals(this.userService.getUserId())
         );
     }
 
@@ -119,7 +120,8 @@ public class ElementService {
                 element.getPositionX(),
                 element.getPositionY(),
                 element.getWidth(),
-                element.getHeight()
+                element.getHeight(),
+                element.getUserId().equals(this.userService.getUserId())
             ));
         }
 

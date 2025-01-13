@@ -1,13 +1,19 @@
 package com.viniciuscastro.elements.services;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 import com.viniciuscastro.dto.response.ElementResponse;
+import com.viniciuscastro.elements.dto.response.QuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionResponse;
 import com.viniciuscastro.elements.models.Question;
+import com.viniciuscastro.elements.models.QuestionAnswer;
 import com.viniciuscastro.elements.models.QuestionType;
+import com.viniciuscastro.elements.repositories.QuestionAnswerRepository;
 import com.viniciuscastro.elements.repositories.QuestionRepository;
 import com.viniciuscastro.services.ElementService;
+import com.viniciuscastro.services.UserService;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -19,7 +25,13 @@ public class QuestionService {
     ElementService elementService;
 
     @Inject
+    UserService userService;
+
+    @Inject
     QuestionRepository questionRepository;
+
+    @Inject
+    QuestionAnswerRepository questionAnswerRepository;
 
     public QuestionResponse getQuestionElement(String elementId) {
         ElementResponse element = this.elementService.getElement(elementId);
@@ -94,5 +106,51 @@ public class QuestionService {
         this.questionRepository.persist(question);
 
         return this.getQuestionElement(questionId);
+    }
+
+    public QuestionAnswerResponse getQuestionAnswer(String elementId) {
+        Question question = this.questionRepository.findByElementId(elementId);
+        if (question == null) {
+            throw new IllegalArgumentException("Question not found");
+        }
+
+        QuestionAnswer questionAnswer = this.questionAnswerRepository.findByQuestionIdAndUserId(elementId, this.userService.getUserId());
+        if (questionAnswer == null) {
+            throw new IllegalArgumentException("Question not answered");
+        }
+
+        return new QuestionAnswerResponse(
+            questionAnswer.getQuestion().getId(),
+            questionAnswer.getAnswer(),
+            questionAnswer.isCorrect(),
+            questionAnswer.getAnsweredAt()
+        );
+    }
+
+    @Transactional
+    public QuestionAnswerResponse answerQuestion(String elementId, String answer) {
+        Question question = this.questionRepository.findByElementId(elementId);
+        if (question == null) {
+            throw new IllegalArgumentException("Question not found");
+        }
+
+        String correctOption = question.getCorrectOption();
+        boolean correct = correctOption == null || correctOption.equals(answer);
+
+        QuestionAnswer questionAnswer = new QuestionAnswer();
+        questionAnswer.setQuestion(question);
+        questionAnswer.setUserId(this.userService.getUserId());
+        questionAnswer.setAnswer(answer);
+        questionAnswer.setCorrect(correct);
+        questionAnswer.setAnsweredAt(Date.from(Instant.now()));
+
+        this.questionAnswerRepository.persist(questionAnswer);
+
+        return new QuestionAnswerResponse(
+            questionAnswer.getQuestion().getId(),
+            questionAnswer.getAnswer(),
+            questionAnswer.isCorrect(),
+            questionAnswer.getAnsweredAt()
+        );
     }
 }

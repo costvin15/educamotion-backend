@@ -13,4 +13,5 @@ public class ElementResponse {
     private Integer positionY;
     private Integer width;
     private Integer height;
+    private boolean isOwner;
 }

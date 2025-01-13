@@ -1,7 +1,9 @@
 package com.viniciuscastro.elements.controllers;
 
+import com.viniciuscastro.elements.dto.request.QuestionAnswerRequest;
 import com.viniciuscastro.elements.dto.request.CreateQuestionRequest;
 import com.viniciuscastro.elements.dto.request.UpdateQuestionRequest;
+import com.viniciuscastro.elements.dto.response.QuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionResponse;
 import com.viniciuscastro.elements.services.QuestionService;
 
@@ -47,6 +49,15 @@ public class QuestionController {
             request.getType(),
             request.getOptions(),
             request.getCorrectOption()
+        );
+    }
+
+    @POST
+    @Path("answer")
+    public QuestionAnswerResponse answerQuestion(QuestionAnswerRequest request) {
+        return this.questionService.answerQuestion(
+            request.getId(),
+            request.getAnswer()
         );
     }
 }
