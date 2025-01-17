@@ -63,7 +63,7 @@ public class PresentationController {
     }
 
     @GET
-    @Path("generate_elements/{presentationId}/{slideId}")
+    @Path("generate-elements/{presentationId}/{slideId}")
     public InteractiveObjects generateElements(String presentationId, String slideId) {
         return this.presentationService.elaborateSlide(presentationId, slideId);
     }
