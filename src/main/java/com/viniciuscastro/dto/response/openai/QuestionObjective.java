@@ -12,6 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionObjective extends InteractiveObject {
-    private String question;
-    private List<String> options;    
+    private String title;
+    private String description;
+    private List<String> options;
+    private String answer;
 }

@@ -10,5 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionSubjetive extends InteractiveObject {
-    private String question;
+    private String title;
+    private String description;
 }
