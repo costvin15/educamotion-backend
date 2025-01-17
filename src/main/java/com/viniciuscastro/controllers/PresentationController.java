@@ -6,6 +6,7 @@ import com.viniciuscastro.dto.response.AvailablePresentationListResponse;
 import com.viniciuscastro.dto.response.PresentationDetailResponse;
 import com.viniciuscastro.dto.response.PresentationListResponse;
 import com.viniciuscastro.dto.response.PresentationResponse;
+import com.viniciuscastro.dto.response.openai.InteractiveObjects;
 import com.viniciuscastro.services.ElementService;
 import com.viniciuscastro.services.PresentationService;
 
@@ -59,5 +60,11 @@ public class PresentationController {
     @Produces("image/png")
     public byte[] fetchImage(String presentationId, String slideId) {
         return this.presentationService.getStoredThumbnail(presentationId, slideId);
+    }
+
+    @GET
+    @Path("generate_elements/{presentationId}/{slideId}")
+    public InteractiveObjects generateElements(String presentationId, String slideId) {
+        return this.presentationService.elaborateSlide(presentationId, slideId);
     }
 }
