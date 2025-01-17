@@ -102,6 +102,11 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-keycloak-admin-rest-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-openai</artifactId>
+            <version>0.23.3</version>
+        </dependency>
 
         <dependency>
             <groupId>io.quarkus</groupId>

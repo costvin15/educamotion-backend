@@ -51,6 +51,13 @@ public class GoogleCloudStorageInterface {
         return url;
     }
 
+    public URL fetchPublicURL(String presentationId, String pageId) {
+        BlobId blobId = BlobId.of(BUCKET_NAME, presentationId + "/" + pageId);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+        URL url = storage.signUrl(blobInfo, 100, TimeUnit.SECONDS, SignUrlOption.withV4Signature());
+        return url;
+    }
+
     public void storeFile(String fileName, String contentType, byte[] fileContent) {
         File file = new File(fileName, contentType, fileContent);
         this.performStore(file);

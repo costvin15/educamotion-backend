@@ -18,9 +18,11 @@ import com.viniciuscastro.dto.response.GoogleDriveFileResponse;
 import com.viniciuscastro.dto.response.GoogleDriveSearchResponse;
 import com.viniciuscastro.dto.response.PresentationDetailResponse;
 import com.viniciuscastro.dto.response.PresentationResponse;
+import com.viniciuscastro.dto.response.openai.InteractiveObjects;
 import com.viniciuscastro.interfaces.GoogleCloudStorageInterface;
 import com.viniciuscastro.interfaces.GoogleDriveInterface;
 import com.viniciuscastro.interfaces.GoogleSlidesInterface;
+import com.viniciuscastro.interfaces.OpenAIService;
 import com.viniciuscastro.models.googleslide.GoogleSlide;
 import com.viniciuscastro.models.googleslide.GoogleSlideImage;
 import com.viniciuscastro.models.googleslide.Page;
@@ -57,6 +59,9 @@ public class PresentationService {
     @Inject
     @RestClient
     GoogleDriveInterface googleDriveInterface;
+
+    @Inject
+    OpenAIService openAIService;
 
     public List<PresentationResponse> getPresentations() {
         List<Presentation> presentations = this.presentationRepository.findByUserId(
@@ -231,5 +236,10 @@ public class PresentationService {
         Presentation presentation = this.getPresentation(presentationId);
         presentation.setLastModified(Date.from(Instant.now()));
         this.presentationRepository.persist(presentation);
+    }
+
+    public InteractiveObjects elaborateSlide(String presentationId, String slideId) {
+        URL slideURL = this.googleCloudStorageInterface.fetchPublicURL(presentationId, slideId);
+        return this.openAIService.generateInteractiveObjects(slideURL);
     }
 }
