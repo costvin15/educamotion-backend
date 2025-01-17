@@ -14,7 +14,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 
-@Authenticated
 @Path("classroom")
 public class ClassroomController {
     @Inject
@@ -24,6 +23,7 @@ public class ClassroomController {
     UserService userService;
 
     @GET
+    @Authenticated
     @Path("{classroomId}")
     public Classroom getClassroom(String classroomId) {
         Optional<Classroom> classroom = this.classroomService.getClassroomByClassroomId(classroomId);
@@ -44,6 +44,7 @@ public class ClassroomController {
     }
 
     @GET
+    @Authenticated
     @Path("presentation/{presentationId}")
     public Classroom getClassroomByPresentationId(String presentationId) {
         Optional<Classroom> classroom = this.classroomService.getClassroomByPresentationId(presentationId);
@@ -54,24 +55,28 @@ public class ClassroomController {
     }
 
     @POST
+    @Authenticated
     @Path("create/{presentationId}")
     public Classroom createClassroom(String presentationId) {
         return this.classroomService.createClassroom(presentationId);
     }
 
     @POST
+    @Authenticated
     @Path("close/{classroomId}")
     public Classroom closeClassroom(String classroomId) {
         return this.classroomService.closeClassroom(classroomId);
     }
 
     @PUT
+    @Authenticated
     @Path("change-slide/{classroomId}/{slide}")
     public Classroom changeSlide(String classroomId, String slide) {
         return this.classroomService.changeSlide(classroomId, slide);
     }
 
     @GET
+    @Authenticated
     @Path("user/{userId}")
     public UserAttendanceResponse getUserAttendance(String userId) {
         return this.classroomService.getUserInformation(userId);

@@ -94,6 +94,8 @@ public class ClassroomService {
             throw new RuntimeException("Classroom not found");
         }
 
+        // TODO: Check if the user is the owner of the classroom
+
         classroom.get().setActive(false);
         classroom.get().setClosedAt(Date.from(Instant.now()));
         this.repository.persist(classroom.get());
