@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import com.viniciuscastro.dto.response.ElementResponse;
@@ -57,10 +58,10 @@ public class ElementService {
             .presentation(presentation)
             .slideId(slideId)
             .type(ElementType.valueOf(elementType))
-            .positionX(0)
-            .positionY(0)
-            .width(0)
-            .height(0)
+            .positionX(new Random().nextInt(0, 75))
+            .positionY(new Random().nextInt(0, 75))
+            .width(40)
+            .height(40)
             .build();
         this.repository.persist(createdElement);
 
