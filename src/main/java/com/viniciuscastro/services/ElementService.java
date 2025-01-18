@@ -58,8 +58,8 @@ public class ElementService {
             .presentation(presentation)
             .slideId(slideId)
             .type(ElementType.valueOf(elementType))
-            .positionX(new Random().nextInt(0, 75))
-            .positionY(new Random().nextInt(0, 75))
+            .positionX(new Random().nextInt(0, 60))
+            .positionY(new Random().nextInt(0, 60))
             .width(40)
             .height(40)
             .build();
