@@ -1,18 +1,27 @@
 package com.viniciuscastro.elements.services;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.viniciuscastro.dto.response.ElementResponse;
 import com.viniciuscastro.elements.dto.response.PartialQuestionAnswerResponse;
+import com.viniciuscastro.elements.dto.response.QuestionAnswerGroupedByPage;
+import com.viniciuscastro.elements.dto.response.QuestionAnswerReportResponse;
 import com.viniciuscastro.elements.dto.response.QuestionAnswerResponse;
+import com.viniciuscastro.elements.dto.response.AnonimousQuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionResponse;
 import com.viniciuscastro.elements.models.Question;
 import com.viniciuscastro.elements.models.QuestionAnswer;
 import com.viniciuscastro.elements.models.QuestionType;
 import com.viniciuscastro.elements.repositories.QuestionAnswerRepository;
 import com.viniciuscastro.elements.repositories.QuestionRepository;
+import com.viniciuscastro.models.presentations.Element;
+import com.viniciuscastro.models.presentations.ElementType;
+import com.viniciuscastro.repositories.ElementRepository;
 import com.viniciuscastro.services.ElementService;
 import com.viniciuscastro.services.UserService;
 
@@ -30,6 +39,9 @@ public class QuestionService {
 
     @Inject
     QuestionRepository questionRepository;
+
+    @Inject
+    ElementRepository elementRepository;
 
     @Inject
     QuestionAnswerRepository questionAnswerRepository;
@@ -128,7 +140,7 @@ public class QuestionService {
     }
 
     @Transactional
-    public QuestionAnswerResponse answerQuestion(String elementId, String answer) {
+    public AnonimousQuestionAnswerResponse answerQuestion(String elementId, String answer) {
         Question question = this.questionRepository.findByElementId(elementId);
         if (question == null) {
             throw new IllegalArgumentException("Question not found");
@@ -150,11 +162,51 @@ public class QuestionService {
 
         this.questionAnswerRepository.persist(questionAnswer);
 
-        return new QuestionAnswerResponse(
+        return new AnonimousQuestionAnswerResponse(
             questionAnswer.getQuestion().getId(),
             questionAnswer.getAnswer(),
             questionAnswer.isCorrect(),
             questionAnswer.getAnsweredAt()
         );
+    }
+
+    public QuestionAnswerReportResponse listAnswersGroupedByPage(String presentationId) {
+        QuestionAnswerReportResponse response = new QuestionAnswerReportResponse();
+        Map<String, QuestionAnswerGroupedByPage> groups = new HashMap<>();
+        List<Element> elements = this.elementRepository.findByPresentationIdAndTypeAndUser(presentationId, this.userService.getUserId(), ElementType.QUESTION);
+
+        for (Element element : elements) {
+            Question question = this.questionRepository.findByElementId(element.getId());
+
+            if (question == null) {
+                throw new IllegalArgumentException("Question not found");
+            }
+
+            if (groups.get(element.getSlideId()) == null) {
+                groups.put(element.getSlideId(), new QuestionAnswerGroupedByPage());
+                groups.get(element.getSlideId()).setAnswers(new ArrayList<>());
+            }
+
+            groups.get(element.getSlideId()).setPage(element.getSlideId());
+
+            List<QuestionAnswer> answers = this.questionAnswerRepository.findByQuestionId(element.getId());
+            for (QuestionAnswer answer : answers) {
+                groups.get(element.getSlideId()).getAnswers().add(new QuestionAnswerResponse(
+                    answer.getQuestion().getId(),
+                    answer.getUserId(),
+                    answer.getAnswer(),
+                    answer.isCorrect(),
+                    answer.getAnsweredAt()
+                ));
+            }
+        }
+
+        response.setPages(new ArrayList<>());
+
+        for (QuestionAnswerGroupedByPage group : groups.values()) {
+            response.getPages().add(group);
+        }
+
+        return response;
     }
 }

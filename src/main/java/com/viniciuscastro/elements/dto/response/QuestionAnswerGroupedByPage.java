@@ -1,6 +1,6 @@
 package com.viniciuscastro.elements.dto.response;
 
-import java.util.Date;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,10 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionAnswerResponse {
-    private String questionId;
-    private String userId;
-    private String answer;
-    private boolean correct;
-    private Date answeredAt;
+public class QuestionAnswerGroupedByPage {
+    private String page;
+    private List<QuestionAnswerResponse> answers;
 }
