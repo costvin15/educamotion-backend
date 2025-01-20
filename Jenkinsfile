@@ -17,7 +17,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t educamotion/backend .'
+                    sh 'docker build -t costvin15/educamotion:latest .'
                 }
             }
         }
@@ -26,7 +26,7 @@ pipeline {
                 script {
                     withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'DOCKERHUB_PASSWORD'), string(credentialsId: 'dockerhub-username', variable: 'DOCKERHUB_USERNAME')]) {
                         sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD"
-                        sh 'docker push educamotion/backend'
+                        sh 'docker push costvin15/educamotion'
                     }
                 }
             }
