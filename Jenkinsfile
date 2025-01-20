@@ -21,5 +21,15 @@ pipeline {
                 }
             }
         }
+        state('Publish Image') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'DOCKERHUB_PASSWORD'), string(credentialsId: 'dockerhub-username', variable: 'DOCKERHUB_USERNAME')]) {
+                        sh "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD"
+                        sh 'docker push educamotion/backend'
+                    }
+                }
+            }
+        }
     }
 }
