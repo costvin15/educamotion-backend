@@ -17,7 +17,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t costvin15/educamotion:1.1 .'
+                    sh 'docker build -t costvin15/educamotion:1.2 .'
                 }
             }
         }
