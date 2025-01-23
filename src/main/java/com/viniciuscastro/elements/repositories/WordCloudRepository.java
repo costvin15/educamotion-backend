@@ -6,5 +6,9 @@ import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
-public class WordCloudRepository implements PanacheRepository<WordCloud> {    
+public class WordCloudRepository implements PanacheRepository<WordCloud> {
+    public WordCloud findByElementId(String elementId) {
+        return this.find("id", elementId)
+            .firstResult();
+    }
 }
