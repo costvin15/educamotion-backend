@@ -1,0 +1,2 @@
+ALTER TABLE question_answer
+ALTER COLUMN answer TYPE VARCHAR(10000);
