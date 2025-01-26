@@ -90,6 +90,7 @@ public class WordCloudService {
         return this.getWordCloudElement(elementId);
     }
 
+    @Transactional
     public WordCloudResponse updateWordCloudElement(String elementId, String title, Boolean enableMultipleEntries) {
         ElementResponse element = this.elementService.getElement(elementId);
 
