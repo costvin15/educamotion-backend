@@ -1,5 +1,7 @@
 package com.viniciuscastro.elements.dto.response;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,5 +10,6 @@ import lombok.Getter;
 public class WordCloudResponse {
     private String id;
     private String title;
-    private Boolean enableMultipleEntries;    
+    private Boolean enableMultipleEntries;
+    private List<WordCloudEntryResponse> entries;
 }
