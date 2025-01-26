@@ -90,6 +90,21 @@ public class WordCloudService {
         return this.getWordCloudElement(elementId);
     }
 
+    public WordCloudResponse updateWordCloudElement(String elementId, String title, Boolean enableMultipleEntries) {
+        ElementResponse element = this.elementService.getElement(elementId);
+
+        WordCloud wordCloud = this.wordCloudRepository.findByElementId(element.getId());
+        if (wordCloud == null) {
+            throw new IllegalArgumentException("WordCloud not found");
+        }
+
+        wordCloud.setTitle(title);
+        wordCloud.setEnableMultipleEntries(enableMultipleEntries);
+        this.wordCloudRepository.persist(wordCloud);
+
+        return this.getWordCloudElement(elementId);
+    }
+
     @Transactional
     public WordCloudEntryResponse addWordCloudEntry(String elementId, String entry) {
         ElementResponse element = this.elementService.getElement(elementId);

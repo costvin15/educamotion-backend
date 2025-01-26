@@ -2,6 +2,7 @@ package com.viniciuscastro.elements.controllers;
 
 import com.viniciuscastro.elements.dto.request.CreateWordCloudEntryRequest;
 import com.viniciuscastro.elements.dto.request.CreateWordCloudRequest;
+import com.viniciuscastro.elements.dto.request.UpdateWordCloudRequest;
 import com.viniciuscastro.elements.dto.response.FrequencyDistributionResponse;
 import com.viniciuscastro.elements.dto.response.WordCloudEntryResponse;
 import com.viniciuscastro.elements.dto.response.WordCloudResponse;
@@ -30,6 +31,16 @@ public class WordCloudController {
     @Path("add")
     public WordCloudResponse addQuestion(CreateWordCloudRequest request) {
         return this.wordCloudService.createWordCloudElement(
+            request.getId(),
+            request.getTitle(),
+            request.getEnableMultipleEntries()
+        );
+    }
+
+    @PUT
+    @Path("update")
+    public WordCloudResponse updateQuestion(UpdateWordCloudRequest request) {
+        return this.wordCloudService.updateWordCloudElement(
             request.getId(),
             request.getTitle(),
             request.getEnableMultipleEntries()
