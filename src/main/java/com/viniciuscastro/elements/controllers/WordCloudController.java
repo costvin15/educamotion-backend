@@ -47,7 +47,7 @@ public class WordCloudController {
         );
     }
 
-    @PUT
+    @POST
     @Path("new-entry")
     public WordCloudEntryResponse addEntry(CreateWordCloudEntryRequest request) {
         return this.wordCloudService.addWordCloudEntry(
