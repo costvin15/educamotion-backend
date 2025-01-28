@@ -5,6 +5,7 @@ import com.viniciuscastro.elements.dto.request.CreateQuestionRequest;
 import com.viniciuscastro.elements.dto.request.UpdateQuestionRequest;
 import com.viniciuscastro.elements.dto.response.PartialQuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionAnswerReportResponse;
+import com.viniciuscastro.elements.dto.response.QuestionAnswersInformation;
 import com.viniciuscastro.elements.dto.response.AnonimousQuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionResponse;
 import com.viniciuscastro.elements.services.QuestionService;
@@ -73,5 +74,11 @@ public class QuestionController {
     @Path("report/{presentationId}")
     public QuestionAnswerReportResponse getReport(String presentationId) {
         return this.questionService.listAnswersGroupedByPage(presentationId);
+    }
+
+    @GET
+    @Path("information/{elementId}")
+    public QuestionAnswersInformation getInformation(String elementId) {
+        return this.questionService.getQuestionAnswersInformation(elementId);
     }
 }

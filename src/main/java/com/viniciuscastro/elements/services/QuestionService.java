@@ -12,6 +12,7 @@ import com.viniciuscastro.elements.dto.response.PartialQuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionAnswerGroupedByPage;
 import com.viniciuscastro.elements.dto.response.QuestionAnswerReportResponse;
 import com.viniciuscastro.elements.dto.response.QuestionAnswerResponse;
+import com.viniciuscastro.elements.dto.response.QuestionAnswersInformation;
 import com.viniciuscastro.elements.dto.response.AnonimousQuestionAnswerResponse;
 import com.viniciuscastro.elements.dto.response.QuestionResponse;
 import com.viniciuscastro.elements.models.Question;
@@ -208,5 +209,28 @@ public class QuestionService {
         }
 
         return response;
+    }
+
+    public QuestionAnswersInformation getQuestionAnswersInformation(String questionId) {
+        Question question = this.questionRepository.findByElementId(questionId);
+        if (question == null) {
+            throw new IllegalArgumentException("Question not found");
+        }
+
+        long totalAnswers = this.countAnswers(questionId);
+        Map<String, Long> answersByOption = this.countAnswersByOption(questionId);
+
+        return new QuestionAnswersInformation(
+            totalAnswers,
+            answersByOption
+        );
+    }
+
+    private long countAnswers(String questionId) {
+        return this.questionAnswerRepository.countByQuestionId(questionId);
+    }
+
+    private Map<String, Long> countAnswersByOption(String questionId) {
+        return this.questionAnswerRepository.groupAnswersByOption(questionId);
     }
 }
